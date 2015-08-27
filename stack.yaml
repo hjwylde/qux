@@ -1,0 +1,13 @@
+flags: {}
+
+packages:
+- '.'
+- location:
+    git: git@github.com:qux-lang/language-qux
+    commit: master
+    extra-dep: true
+
+extra-deps: []
+
+resolver: lts-3.2
+
