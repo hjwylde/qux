@@ -4,7 +4,7 @@ packages:
 - '.'
 - location:
     git: git@github.com:qux-lang/language-qux
-    commit: master
+    commit: refs/remotes/origin/release/0.1
     extra-dep: true
 
 extra-deps: []

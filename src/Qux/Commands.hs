@@ -29,7 +29,7 @@ import qualified Qux.Commands.Run   as Run
 options :: ParserInfo Options
 options = info (helper <*> version <*> qux) (fullDesc <> noIntersperse)
     where
-        version = infoOption "0.0.0" $ mconcat [
+        version = infoOption "0.1.0" $ mconcat [
             long "version",
             short 'V',
             help "Show this binary's version",
