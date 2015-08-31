@@ -14,9 +14,8 @@ module Qux.Commands.Build where
 import Control.Monad.Except
 
 import Language.Qux.Annotated.Parser
-import Language.Qux.Annotated.Simplify
 import Language.Qux.Annotated.Syntax
-import Language.Qux.TypeChecker
+import Language.Qux.Annotated.TypeChecker
 
 import System.Exit
 import System.IO
@@ -40,9 +39,9 @@ handle options = do
 tryParse :: FilePath -> String -> Except String (Program SourcePos)
 tryParse filePath contents = withExcept show (parse program filePath contents)
 
-build :: Options -> Program a -> Except String ()
+build :: Options -> Program SourcePos -> Except String ()
 build options program = when (optTypeCheck options) (typeCheck program)
 
-typeCheck :: (Program a) -> Except String ()
-typeCheck program = withExcept show (check $ sProgram program)
+typeCheck :: Program SourcePos -> Except String ()
+typeCheck program = withExcept show (check program)
 
