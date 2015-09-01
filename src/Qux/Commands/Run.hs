@@ -25,6 +25,7 @@ import System.IO
 
 
 data Options = Options {
+    optEntry    :: String,
     argFilePath :: FilePath,
     argsExtra   :: [String]
     }
@@ -42,7 +43,6 @@ handle options = do
 run :: Options -> Program a -> Except String String
 run options program = return $ render (pPrint result)
     where
-        result = exec (sProgram program) main args
-        main = "main"
+        result = exec (sProgram program) (optEntry options) args
         args = map (IntValue . read) (argsExtra options)
 

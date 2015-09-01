@@ -125,7 +125,15 @@ print = fmap Print $ Print.Options
 
 run :: Parser Command
 run = fmap Run $ Run.Options
-    <$> strArgument (mconcat [
+    <$> strOption (mconcat [
+        long "entry",
+        short 'e',
+        metavar "NAME",
+        value "main",
+        showDefault,
+        help "Specify the program entry point"
+        ])
+    <*> strArgument (mconcat [
         metavar "FILE"
         ])
     <*> many (strArgument $ mconcat [
