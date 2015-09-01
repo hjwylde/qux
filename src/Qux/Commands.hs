@@ -45,7 +45,7 @@ data Options = Options {
 qux :: Parser Options
 qux = Options <$> subparser (mconcat [
     command "build" $ info (helper <*> build)   (fullDesc <> progDesc "Build FILE using composable options"),
-    command "check" $ info (helper <*> check)   (fullDesc <> progDesc "Check FILE for correctness" <> header "Synonymous to `qux build --type-check'"),
+    command "check" $ info (helper <*> check)   (fullDesc <> progDesc "Check FILE for correctness" <> header "Shortcut for `qux build --type-check'"),
     command "print" $ info (helper <*> print)   (fullDesc <> progDesc "Pretty print FILE"),
     command "run"   $ info (helper <*> run)     (fullDesc <> progDesc "Run FILE passing in ARGS as program arguments")
     ])
