@@ -11,7 +11,10 @@ Maintainer  : public@hjwylde.com
 
 module Qux.Commands where
 
+import Data.Version (showVersion)
+
 import Language.Qux.Annotated.PrettyPrinter
+import qualified Language.Qux.Version as Qux
 
 import Options.Applicative
 import Options.Applicative.Types
@@ -22,17 +25,23 @@ import qualified Qux.Commands.Build as Build
 import qualified Qux.Commands.Check as Check
 import qualified Qux.Commands.Print as Print
 import qualified Qux.Commands.Run   as Run
+import qualified Qux.Version        as Binary
 
 
 -- * Qux command
 
 options :: ParserInfo Options
-options = info (helper <*> version <*> qux) (fullDesc <> noIntersperse)
+options = info (helper <*> version <*> quxVersion <*> qux) (fullDesc <> noIntersperse)
     where
-        version = infoOption "0.1.0" $ mconcat [
+        version = infoOption ("Version " ++ showVersion Binary.version) $ mconcat [
             long "version",
             short 'V',
             help "Show this binary's version",
+            hidden
+            ]
+        quxVersion = infoOption ("Qux version " ++ showVersion Qux.version) $ mconcat [
+            long "qux-version",
+            help "Show the qux version this binary was compiled with",
             hidden
             ]
 

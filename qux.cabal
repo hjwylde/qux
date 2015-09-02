@@ -21,11 +21,13 @@ executable qux
     main-is: Main.hs
     hs-source-dirs: main/ src/
     other-modules:
+        Paths_qux,
         Qux.Commands,
         Qux.Commands.Build,
         Qux.Commands.Check,
         Qux.Commands.Print,
-        Qux.Commands.Run
+        Qux.Commands.Run,
+        Qux.Version
 
     default-language: Haskell2010
     build-depends:
