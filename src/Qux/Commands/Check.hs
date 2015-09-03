@@ -15,12 +15,12 @@ import qualified Qux.Commands.Build as Build
 
 
 data Options = Options {
-    argFilePath :: String
+    argFilePaths :: [String]
     }
 
 handle :: Options -> IO ()
 handle options = Build.handle Build.Options {
-    Build.argFilePath = argFilePath options,
-    Build.optTypeCheck = True
+    Build.optTypeCheck = True,
+    Build.argFilePaths = argFilePaths options
     }
 

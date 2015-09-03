@@ -53,8 +53,8 @@ data Options = Options {
 -- TODO (hjw): improve error message to say "Invalid command x"
 qux :: Parser Options
 qux = Options <$> subparser (mconcat [
-    command "build" $ info (helper <*> build)   (fullDesc <> progDesc "Build FILE using composable options"),
-    command "check" $ info (helper <*> check)   (fullDesc <> progDesc "Check FILE for correctness" <> header "Shortcut for `qux build --type-check'"),
+    command "build" $ info (helper <*> build)   (fullDesc <> progDesc "Build FILES using composable options"),
+    command "check" $ info (helper <*> check)   (fullDesc <> progDesc "Check FILES for correctness" <> header "Shortcut for `qux build --type-check'"),
     command "print" $ info (helper <*> print)   (fullDesc <> progDesc "Pretty print FILE"),
     command "run"   $ info (helper <*> run)     (fullDesc <> progDesc "Run FILE passing in ARGS as program arguments")
     ])
@@ -76,16 +76,16 @@ build = fmap Build $ Build.Options
         long "type-check",
         help "Enable type checking"
         ])
-    <*> strArgument (mconcat [
-        metavar "FILE"
+    <*> some (strArgument $ mconcat [
+        metavar "FILES..."
         ])
 
 
 -- ** Check
 
 check :: Parser Command
-check = Check . Check.Options <$> strArgument (mconcat [
-    metavar "FILE"
+check = Check . Check.Options <$> some (strArgument $ mconcat [
+    metavar "FILES..."
     ])
 
 

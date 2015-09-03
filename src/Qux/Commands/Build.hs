@@ -23,16 +23,16 @@ import System.IO
 
 data Options = Options {
     optTypeCheck    :: Bool,
-    argFilePath     :: String
+    argFilePaths    :: [String]
     }
 
 handle :: Options -> IO ()
 handle options = do
-    let filePath = argFilePath options
+    let filePaths = argFilePaths options
 
-    contents <- readFile $ argFilePath options
+    fileContents <- mapM readFile filePaths
 
-    case runExcept $ tryParse filePath contents >>= build options of
+    case runExcept $ zipWithM tryParse filePaths fileContents >>= mapM_ (build options) of
         Left error  -> hPutStrLn stderr error >> exitFailure
         Right _     -> return ()
 
