@@ -29,9 +29,9 @@ import System.IO
 
 
 data Options = Options {
-    optEntry    :: String,
-    argFilePath :: FilePath,
-    argsExtra   :: [String]
+    optEntry        :: String,
+    argFilePath     :: FilePath,
+    argProgramArgs  :: [String]
     }
 
 handle :: Options -> IO ()
@@ -46,7 +46,7 @@ handle options = do
 
 run :: Options -> Program a -> Except String String
 run options program = do
-    args <- parseArgs $ argsExtra options
+    args <- parseArgs $ argProgramArgs options
 
     typeCheckArgs args
 

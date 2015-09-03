@@ -146,6 +146,6 @@ run = fmap Run $ Run.Options
         metavar "FILE"
         ])
     <*> many (strArgument $ mconcat [
-        metavar "ARGS..."
+        metavar "-- ARGS..."
         ])
 
