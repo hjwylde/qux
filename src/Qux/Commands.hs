@@ -31,12 +31,18 @@ import qualified Qux.Version        as Binary
 -- * Qux command
 
 options :: ParserInfo Options
-options = info (helper <*> version <*> quxVersion <*> qux) (fullDesc <> noIntersperse)
+options = info (infoOptions <*> qux) (fullDesc <> noIntersperse)
     where
+        infoOptions = helper <*> version <*> numericVersion <*> quxVersion
         version = infoOption ("Version " ++ showVersion Binary.version) $ mconcat [
             long "version",
             short 'V',
             help "Show this binary's version",
+            hidden
+            ]
+        numericVersion = infoOption (showVersion Binary.version) $ mconcat [
+            long "numeric-version",
+            help "Show this binary's version (without the prefix)",
             hidden
             ]
         quxVersion = infoOption ("Qux version " ++ showVersion Qux.version) $ mconcat [

@@ -4,8 +4,10 @@
 
 * Updated usage text for `qux check`.
 * Added `--entry` option to `qux run`.
-* Added `--qux-version` global flag.
+* Added `--qux-version` global option.
 * Added ability to parse any valid Qux value as an argument to `qux run`.
+* Added ability to build and check multiple files at once.
+* Added `--numeric-version` global option.
 
 #### v0.1.0.0
 
