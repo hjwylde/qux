@@ -113,7 +113,7 @@ print = fmap Print $ Print.Options
         metavar "MODE",
         value PageMode,
         showDefaultWith $ const "normal",
-        help "Specify the rendering mode as either 'normal' or 'one-line'"
+        help "Specify the rendering mode as either `normal' or `one-line'"
         ])
     <*> option auto (mconcat [
         long "ribbons-per-line",
@@ -147,6 +147,10 @@ run = fmap Run $ Run.Options
         value "main",
         showDefault,
         help "Specify the program entry point"
+        ])
+    <*> switch (mconcat [
+        long "skip-checks",
+        help "Skip the correctness checks (from `qux check')"
         ])
     <*> strArgument (mconcat [
         metavar "FILE"

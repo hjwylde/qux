@@ -31,7 +31,6 @@ data Options = Options {
 handle :: Options -> IO ()
 handle options = do
     let filePath = argFilePath options
-
     contents <- readFile $ argFilePath options
 
     case runExcept $ tryParse filePath contents of

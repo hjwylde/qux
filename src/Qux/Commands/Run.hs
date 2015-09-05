@@ -23,6 +23,7 @@ import Language.Qux.Interpreter
 import Language.Qux.PrettyPrinter
 
 import Qux.Commands.Build (tryParse)
+import qualified Qux.Commands.Check as Check
 
 import System.Exit
 import System.IO
@@ -30,6 +31,7 @@ import System.IO
 
 data Options = Options {
     optEntry        :: String,
+    optSkipChecks   :: Bool,
     argFilePath     :: FilePath,
     argProgramArgs  :: [String]
     }
@@ -37,18 +39,18 @@ data Options = Options {
 handle :: Options -> IO ()
 handle options = do
     let filePath = argFilePath options
-
     contents <- readFile $ argFilePath options
 
     case runExcept $ tryParse filePath contents >>= run options of
         Left error      -> hPutStrLn stderr error >> exitFailure
         Right result    -> putStrLn result
 
-run :: Options -> Program a -> Except String String
+run :: Options -> Program SourcePos -> Except String String
 run options program = do
     args <- parseArgs $ argProgramArgs options
-
     typeCheckArgs args
+
+    when (not $ optSkipChecks options) $ Check.check program
 
     let result = exec (sProgram program) (optEntry options) args
 
