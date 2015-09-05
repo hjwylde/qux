@@ -13,6 +13,8 @@ module Qux.Commands.Build where
 
 import Control.Monad.Except
 
+import Data.List (intercalate)
+
 import Language.Qux.Annotated.Parser
 import Language.Qux.Annotated.Syntax
 import Language.Qux.Annotated.TypeChecker
@@ -29,7 +31,6 @@ data Options = Options {
 handle :: Options -> IO ()
 handle options = do
     let filePaths = argFilePaths options
-
     fileContents <- mapM readFile filePaths
 
     case runExcept $ zipWithM tryParse filePaths fileContents >>= mapM_ (build options) of
@@ -43,5 +44,7 @@ build :: Options -> Program SourcePos -> Except String ()
 build options program = when (optTypeCheck options) (typeCheck program)
 
 typeCheck :: Program SourcePos -> Except String ()
-typeCheck program = withExcept show (check program)
+typeCheck program = when (not $ null errors) $ throwError (intercalate "\n\n" $ map show errors)
+    where
+        errors = check program
 

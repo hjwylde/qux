@@ -13,7 +13,7 @@ module Qux.Commands.Run where
 
 import Control.Monad.Except
 
-import qualified Data.Map as Map
+import Data.List (intercalate)
 
 import Language.Qux.Annotated.Parser
 import Language.Qux.Annotated.Simplify
@@ -59,5 +59,7 @@ parseArgs :: [String] -> Except String [Value]
 parseArgs = mapM (withExcept show . parse value "command line")
 
 typeCheckArgs :: [Value] -> Except String ()
-typeCheckArgs = mapM_ (\value -> withExcept show $ runCheck (checkValue value) emptyContext Map.empty)
+typeCheckArgs args = when (not $ null errors) $ throwError (intercalate "\n\n" $ map show errors)
+    where
+        errors = concatMap (\value -> execCheck (checkValue value) emptyContext) args
 
