@@ -13,10 +13,7 @@ module Main (
     main
 ) where
 
-import Control.Applicative
-
 import Options.Applicative
-import Options.Applicative.Builder
 
 import Qux.Commands
 import qualified Qux.Commands.Build as Build
