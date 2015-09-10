@@ -19,7 +19,7 @@ import Language.Qux.Annotated.Parser
 import Language.Qux.Annotated.Simplify
 import Language.Qux.Annotated.Syntax
 import Language.Qux.Annotated.TypeChecker
-import Language.Qux.Interpreter
+import Language.Qux.Interpreter hiding (emptyContext)
 import Language.Qux.PrettyPrinter
 
 import Qux.Commands.Build (tryParse)
@@ -50,7 +50,7 @@ run options program = do
     args <- parseArgs $ argProgramArgs options
     typeCheckArgs args
 
-    when (not $ optSkipChecks options) $ Check.check program
+    when (not $ optSkipChecks options) $ Check.check (checkOptions options) program
 
     let result = exec (sProgram program) (optEntry options) args
 
@@ -64,4 +64,9 @@ typeCheckArgs :: [Value] -> Except String ()
 typeCheckArgs args = when (not $ null errors) $ throwError (intercalate "\n\n" $ map show errors)
     where
         errors = concatMap (\value -> execCheck (checkValue value) emptyContext) args
+
+checkOptions :: Options -> Check.Options
+checkOptions options = Check.Options {
+    Check.argFilePaths = [argFilePath options]
+    }
 

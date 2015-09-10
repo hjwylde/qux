@@ -26,8 +26,8 @@ data Options = Options {
 handle :: Options -> IO ()
 handle options = Build.handle $ buildOptions options
 
-check :: Program SourcePos -> Except String ()
-check = Build.build $ buildOptions undefined
+check :: Options -> Program SourcePos -> Except String ()
+check options = Build.build $ buildOptions options
 
 buildOptions :: Options -> Build.Options
 buildOptions options = Build.Options {
