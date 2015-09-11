@@ -9,9 +9,7 @@ License     : BSD3
 Maintainer  : public@hjwylde.com
 -}
 
-module Main (
-    main
-) where
+module Main where
 
 import Options.Applicative
 
@@ -24,7 +22,7 @@ import qualified Qux.Commands.Run   as Run
 
 -- | Main.
 main :: IO ()
-main = customExecParser (prefs $ columns 100) options >>= handle
+main = customExecParser quxPrefs quxInfo >>= handle
 
 handle :: Options -> IO ()
 handle options = case argCommand options of

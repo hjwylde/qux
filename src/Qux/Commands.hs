@@ -28,10 +28,13 @@ import qualified Qux.Commands.Run   as Run
 import qualified Qux.Version        as Binary
 
 
--- * Qux command
+-- * Optparse for Qux
 
-options :: ParserInfo Options
-options = info (infoOptions <*> qux) (fullDesc <> noIntersperse)
+quxPrefs :: ParserPrefs
+quxPrefs = prefs $ columns 100
+
+quxInfo :: ParserInfo Options
+quxInfo = info (infoOptions <*> qux) (fullDesc <> noIntersperse)
     where
         infoOptions = helper <*> version <*> numericVersion <*> quxVersion
         version = infoOption ("Version " ++ showVersion Binary.version) $ mconcat [
@@ -50,6 +53,8 @@ options = info (infoOptions <*> qux) (fullDesc <> noIntersperse)
             help "Show the qux version this binary was compiled with",
             hidden
             ]
+
+-- * Command
 
 data Options = Options {
     argCommand :: Command
