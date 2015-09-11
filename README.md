@@ -7,11 +7,31 @@ Qux is an experimental language developed from the ground up with the aim of sup
     static checks at compile time.
 
 This project provides a binary for working with the Qux language.
-It supports the following operations:
-* `build`   --- composable version of `check`.
-* `check`   --- type checking.
-* `print`   --- pretty printing.
-* `run`     --- interpreter.
+It features:
+* Type checking.
+* Pretty printing.
+* Running.
 
-For full usage, see `qux --help`.
+For help on how to call `qux`, see `qux --help`.
+
+### Installing
+
+Installing `qux` is easiest done using either [stack](https://github.com/commercialhaskell/stack)
+    (recommended) or [Cabal](https://github.com/haskell/cabal).
+
+**Using stack**:
+
+```bash
+stack install qux
+```
+
+And make sure `~/.local/bin` is included on your `$PATH`.
+
+**Using Cabal**:
+
+```bash
+cabal-install qux
+```
+
+And make sure `~/.cabal/bin` is included on your `$PATH`.
 
