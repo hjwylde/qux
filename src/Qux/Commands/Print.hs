@@ -15,7 +15,7 @@ import Control.Monad.Except
 
 import Language.Qux.Annotated.PrettyPrinter
 
-import Qux.Commands.Build (tryParse)
+import Qux.Commands.Build (parse)
 
 import System.Exit
 import System.IO
@@ -25,7 +25,7 @@ data Options = Options {
     optLineLength       :: Int,
     optMode             :: Mode,
     optRibbonsPerLine   :: Float,
-    argFilePath         :: String
+    argFilePath         :: FilePath
     }
 
 handle :: Options -> IO ()
@@ -33,7 +33,8 @@ handle options = do
     let filePath = argFilePath options
     contents <- readFile $ argFilePath options
 
-    case runExcept $ tryParse filePath contents of
+    ethr <- runExceptT $ parse filePath contents
+    case ethr of
         Left error      -> hPutStrLn stderr (show error) >> exitFailure
         Right program   -> putStrLn $ renderStyle (style options) (pPrint program)
 

@@ -12,39 +12,89 @@ Maintainer  : public@hjwylde.com
 module Qux.Commands.Build where
 
 import Control.Monad.Except
+import Control.Monad.Identity
 
-import Data.List (intercalate)
+import qualified    Data.ByteString as BS
+import              Data.List (intercalate)
 
-import Language.Qux.Annotated.Parser
-import Language.Qux.Annotated.Syntax
-import Language.Qux.Annotated.TypeChecker
+import              Language.Qux.Annotated.Parser       hiding (parse)
+import qualified    Language.Qux.Annotated.Parser       as P
+import              Language.Qux.Annotated.Simplify
+import              Language.Qux.Annotated.Syntax
+import              Language.Qux.Annotated.TypeChecker
+import qualified    Language.Qux.Llvm.Compiler          as C
+
+import LLVM.General
+import LLVM.General.Context
 
 import System.Exit
+import System.FilePath
 import System.IO
 
 
 data Options = Options {
+    optCompile      :: Bool,
+    optDestination  :: FilePath,
+    optFormat       :: Format,
     optTypeCheck    :: Bool,
-    argFilePaths    :: [String]
+    argFilePaths    :: [FilePath]
     }
+
+defaultOptions :: Options
+defaultOptions = Options {
+    optCompile      = False,
+    optDestination  = "./",
+    optFormat       = Bitcode,
+    optTypeCheck    = False,
+    argFilePaths    = []
+    }
+
+data Format = Assembly | Bitcode
+    deriving Eq
+
+instance Show Format where
+    show Assembly   = "assembly"
+    show Bitcode    = "bitcode"
+
 
 handle :: Options -> IO ()
 handle options = do
     let filePaths = argFilePaths options
     fileContents <- mapM readFile filePaths
 
-    case runExcept $ zipWithM tryParse filePaths fileContents >>= mapM_ (build options) of
+    ethr <- runExceptT $ zipWithM parse filePaths fileContents >>= mapM_ (build options)
+    case ethr of
         Left error  -> hPutStrLn stderr error >> exitFailure
         Right _     -> return ()
 
-tryParse :: FilePath -> String -> Except String (Program SourcePos)
-tryParse filePath contents = withExcept show (parse program filePath contents)
+parse :: FilePath -> String -> ExceptT String IO (Program SourcePos)
+parse filePath contents = mapExceptT (return . runIdentity) (withExcept show (P.parse program filePath contents))
 
-build :: Options -> Program SourcePos -> Except String ()
-build options program = when (optTypeCheck options) (typeCheck program)
+build :: Options -> Program SourcePos -> ExceptT String IO ()
+build options program = do
+    when (optTypeCheck options) $ typeCheck program
+    when (optCompile options)   $ compile options program
 
-typeCheck :: Program SourcePos -> Except String ()
+typeCheck :: Program SourcePos -> ExceptT String IO ()
 typeCheck program = when (not $ null errors) $ throwError (intercalate "\n\n" $ map show errors)
     where
         errors = check program
+
+compile :: Options -> Program SourcePos -> ExceptT String IO ()
+compile options program
+    | optFormat options == Assembly = liftIO $ do
+        assembly <- withContext $ \context ->
+            runExceptT (withModuleFromAST context mod moduleLLVMAssembly) >>= either fail return
+
+        writeFile (addExtension (basePath ++ baseName) "ll") assembly
+    | optFormat options == Bitcode  = liftIO $ do
+        bitcode <- withContext $ \context ->
+            runExceptT (withModuleFromAST context mod moduleBitcode) >>= either fail return
+
+        BS.writeFile (addExtension (basePath ++ baseName) "bc") bitcode
+    | otherwise                     = error $ "format not implemented `" ++ show (optFormat options) ++ "'"
+    where
+        mod         = C.compile $ sProgram program
+        basePath    = addTrailingPathSeparator (optDestination options)
+        baseName    = takeBaseName $ sourceName (ann program)
 

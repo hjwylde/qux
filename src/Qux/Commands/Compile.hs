@@ -2,36 +2,32 @@
 {-# OPTIONS_HADDOCK hide, prune #-}
 
 {-|
-Module      : Qux.Commands.Check
+Module      : Qux.Commands.Compile
 
 Copyright   : (c) Henry J. Wylde, 2015
 License     : BSD3
 Maintainer  : public@hjwylde.com
 -}
 
-module Qux.Commands.Check where
-
-import Control.Monad.Except
-
-import Language.Qux.Annotated.Parser
-import Language.Qux.Annotated.Syntax
+module Qux.Commands.Compile where
 
 import qualified Qux.Commands.Build as Build
 
 
 data Options = Options {
-    argFilePaths :: [FilePath]
+    optDestination  :: FilePath,
+    optFormat       :: Build.Format,
+    argFilePaths    :: [FilePath]
     }
 
 handle :: Options -> IO ()
 handle options = Build.handle $ buildOptions options
 
-check :: Options -> Program SourcePos -> ExceptT String IO ()
-check options = Build.build $ buildOptions options
-
 buildOptions :: Options -> Build.Options
 buildOptions options = Build.defaultOptions {
-    Build.optTypeCheck = True,
-    Build.argFilePaths = argFilePaths options
+    Build.optCompile        = True,
+    Build.optDestination    = optDestination options,
+    Build.optFormat         = optFormat options,
+    Build.argFilePaths      = argFilePaths options
     }
 

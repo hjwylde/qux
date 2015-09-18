@@ -12,18 +12,20 @@ Maintainer  : public@hjwylde.com
 module Qux.Commands.Run where
 
 import Control.Monad.Except
+import Control.Monad.Identity
 
 import Data.List (intercalate)
 
-import Language.Qux.Annotated.Parser
-import Language.Qux.Annotated.Simplify
-import Language.Qux.Annotated.Syntax
-import Language.Qux.Annotated.TypeChecker
-import Language.Qux.Interpreter hiding (emptyContext)
-import Language.Qux.PrettyPrinter
+import              Language.Qux.Annotated.Parser       hiding (parse)
+import qualified    Language.Qux.Annotated.Parser       as P
+import              Language.Qux.Annotated.Simplify
+import              Language.Qux.Annotated.Syntax
+import              Language.Qux.Annotated.TypeChecker
+import              Language.Qux.Interpreter            hiding (emptyContext)
+import              Language.Qux.PrettyPrinter
 
-import Qux.Commands.Build (tryParse)
-import qualified Qux.Commands.Check as Check
+import              Qux.Commands.Build (parse)
+import qualified    Qux.Commands.Check as Check
 
 import System.Exit
 import System.IO
@@ -41,11 +43,12 @@ handle options = do
     let filePath = argFilePath options
     contents <- readFile $ argFilePath options
 
-    case runExcept $ tryParse filePath contents >>= run options of
+    ethr <- runExceptT $ parse filePath contents >>= run options
+    case ethr of
         Left error      -> hPutStrLn stderr error >> exitFailure
         Right result    -> putStrLn result
 
-run :: Options -> Program SourcePos -> Except String String
+run :: Options -> Program SourcePos -> ExceptT String IO String
 run options program = do
     args <- parseArgs $ argProgramArgs options
     typeCheckArgs args
@@ -56,11 +59,10 @@ run options program = do
 
     return $ render (pPrint result)
 
--- TODO (hjw): improve the error message (the source position is wrong)
-parseArgs :: [String] -> Except String [Value]
-parseArgs = mapM (withExcept show . parse value "command line")
+parseArgs :: [String] -> ExceptT String IO [Value]
+parseArgs = mapM (\arg -> mapExceptT (return . runIdentity) (withExcept show (P.parse value "command line" arg)))
 
-typeCheckArgs :: [Value] -> Except String ()
+typeCheckArgs :: [Value] -> ExceptT String IO ()
 typeCheckArgs args = when (not $ null errors) $ throwError (intercalate "\n\n" $ map show errors)
     where
         errors = concatMap (\value -> execCheck (checkValue value) emptyContext) args

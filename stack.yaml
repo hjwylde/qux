@@ -8,4 +8,5 @@ ghc-options:
     'qux': -Wall -Werror -fno-warn-name-shadowing
 
 resolver: lts-3.4
+extra-deps: ['llvm-general-3.4.5.4', 'llvm-general-pure-3.4.5.4']
 
