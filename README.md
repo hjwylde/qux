@@ -10,6 +10,7 @@ This project provides a binary for working with the Qux language.
 It features:
 * Type checking.
 * Pretty printing.
+* Compiling.
 * Running.
 
 For help on how to call `qux`, see `qux --help`.
@@ -18,6 +19,8 @@ For help on how to call `qux`, see `qux --help`.
 
 Installing `qux` is easiest done using either [stack](https://github.com/commercialhaskell/stack)
     (recommended) or [Cabal](https://github.com/haskell/cabal).
+
+NB: LLVM (v3.4) is required on the system for compiling Qux files.
 
 **Using stack**:
 

@@ -8,7 +8,7 @@ homepage:       https://github.com/qux-lang/qux
 synopsis:       Command line binary for working with the Qux language
 description:    Qux is an experimental language developed from the ground up with the aim of static
                 compile time verification. This package provides a binary for working with it
-                (parsing, printing, type checking and running).
+                (parsing, printing, type checking, compiling and running).
 
 license:        BSD3
 license-file:   LICENSE
