@@ -11,7 +11,7 @@ It features:
 * Type checking.
 * Pretty printing.
 * Compiling.
-* Running.
+* Running (DEPRECATED).
 
 For help on how to call `qux`, see `qux --help`.
 

@@ -63,7 +63,7 @@ qux = Options <$> subparser (mconcat [
     command "check"     $ info (helper <*> check)   (fullDesc <> progDesc "Check FILES for correctness" <> header "Shortcut for `qux build --type-check'"),
     command "compile"   $ info (helper <*> compile) (fullDesc <> progDesc "Compile FILES into the LLVM IR" <> header "Shortcut for `qux build --compile'"),
     command "print"     $ info (helper <*> print)   (fullDesc <> progDesc "Pretty print FILE"),
-    command "run"       $ info (helper <*> run)     (fullDesc <> progDesc "Run FILE passing in ARGS as program arguments")
+    command "run"       $ info (helper <*> run)     (fullDesc <> progDesc "Run FILE passing in ARGS as program arguments" <> header "DEPRECATED: will be removed in v1.0.0.0")
     ])
 
 
