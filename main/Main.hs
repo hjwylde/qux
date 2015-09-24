@@ -13,12 +13,12 @@ module Main where
 
 import Options.Applicative
 
-import Qux.Commands
-import qualified Qux.Commands.Build     as Build
-import qualified Qux.Commands.Check     as Check
-import qualified Qux.Commands.Compile   as Compile
-import qualified Qux.Commands.Print     as Print
-import qualified Qux.Commands.Run       as Run
+import              Qux.Commands
+import qualified    Qux.Commands.Build      as Build
+import qualified    Qux.Commands.Check      as Check
+import qualified    Qux.Commands.Compile    as Compile
+import qualified    Qux.Commands.Print      as Print
+import qualified    Qux.Commands.Run        as Run
 
 
 -- | Main.
