@@ -8,8 +8,9 @@
 * Added ability to parse any valid Qux value as an argument to `qux run`.
 * Added ability to build and check multiple files at once.
 * Updated build and check to print multiple errors.
-* Added program checking as default to `qux run' and option to skip it, `--skip-checks'.
+* Added program checking as default to `qux run` and option to skip it, `--skip-checks`.
 * Added `compile` command to enable compilation to LLVM IR.
+* Deprecated `qux run` (to be removed in v1.0.0.0).
 
 #### v0.1.0.0
 

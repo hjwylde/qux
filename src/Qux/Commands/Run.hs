@@ -29,6 +29,7 @@ import qualified    Qux.Commands.Check as Check
 
 import System.Exit
 import System.IO
+import System.IO.Error
 
 
 data Options = Options {
@@ -43,7 +44,10 @@ handle options = do
     let filePath = argFilePath options
     contents <- readFile $ argFilePath options
 
-    ethr <- runExceptT $ parse filePath contents >>= run options
+    ethr <- catchIOError
+        (runExceptT $ parse filePath contents >>= run options)
+        (return . Left . ioeGetErrorString)
+
     case ethr of
         Left error      -> hPutStrLn stderr error >> exitFailure
         Right result    -> putStrLn result

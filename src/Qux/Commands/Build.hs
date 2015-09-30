@@ -30,6 +30,7 @@ import LLVM.General.Context
 import System.Exit
 import System.FilePath
 import System.IO
+import System.IO.Error
 
 
 data Options = Options {
@@ -62,7 +63,10 @@ handle options = do
     let filePaths = argFilePaths options
     fileContents <- mapM readFile filePaths
 
-    ethr <- runExceptT $ zipWithM parse filePaths fileContents >>= mapM_ (build options)
+    ethr <- catchIOError
+        (runExceptT $ zipWithM parse filePaths fileContents >>= mapM_ (build options))
+        (return . Left . ioeGetErrorString)
+
     case ethr of
         Left error  -> hPutStrLn stderr error >> exitFailure
         Right _     -> return ()

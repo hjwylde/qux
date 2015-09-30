@@ -19,6 +19,7 @@ import Qux.Commands.Build (parse)
 
 import System.Exit
 import System.IO
+import System.IO.Error
 
 
 data Options = Options {
@@ -33,7 +34,10 @@ handle options = do
     let filePath = argFilePath options
     contents <- readFile $ argFilePath options
 
-    ethr <- runExceptT $ parse filePath contents
+    ethr <- catchIOError
+        (runExceptT $ parse filePath contents)
+        (return . Left . ioeGetErrorString)
+
     case ethr of
         Left error      -> hPutStrLn stderr (show error) >> exitFailure
         Right program   -> putStrLn $ renderStyle (style options) (pPrint program)
