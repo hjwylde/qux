@@ -153,14 +153,10 @@ print = fmap Print $ Print.Options
         metavar "FILE"
         ])
     where
-        modeOption :: Mod OptionFields Mode -> Parser Mode
-        modeOption = option $ do
-            opt <- readerAsk
-
-            case opt of
-                "normal"    -> return PageMode
-                "one-line"  -> return OneLineMode
-                _           -> readerError $ "unrecognised mode `" ++ opt ++ "'"
+        modeOption = option $ readerAsk >>= \opt -> case opt of
+            "normal"    -> return PageMode
+            "one-line"  -> return OneLineMode
+            _           -> readerError $ "unrecognised mode `" ++ opt ++ "'"
 
 -- ** Run
 
@@ -186,11 +182,8 @@ run = fmap Run $ Run.Options
 -- ** Helpers
 
 formatOption :: Mod OptionFields Build.Format -> Parser Build.Format
-formatOption = option $ do
-    opt <- readerAsk
-
-    case opt of
-        "assembly"  -> return Build.Assembly
-        "bitcode"   -> return Build.Bitcode
-        _           -> readerError $ "unrecognised format `" ++ opt ++ "'"
+formatOption = option $ readerAsk >>= \opt -> case opt of
+    "assembly"  -> return Build.Assembly
+    "bitcode"   -> return Build.Bitcode
+    _           -> readerError $ "unrecognised format `" ++ opt ++ "'"
 
