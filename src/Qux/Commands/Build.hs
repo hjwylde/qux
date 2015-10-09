@@ -15,7 +15,7 @@ import Control.Monad.Except
 import Control.Monad.Identity
 
 import qualified    Data.ByteString as BS
-import              Data.List (intercalate)
+import              Data.List       (intercalate)
 
 import              Language.Qux.Annotated.Parser       hiding (parse)
 import qualified    Language.Qux.Annotated.Parser       as P
@@ -27,6 +27,7 @@ import qualified    Language.Qux.Llvm.Compiler          as C
 import LLVM.General
 import LLVM.General.Context
 
+import System.Directory
 import System.Exit
 import System.FilePath
 import System.IO
@@ -44,7 +45,7 @@ data Options = Options {
 defaultOptions :: Options
 defaultOptions = Options {
     optCompile      = False,
-    optDestination  = "./",
+    optDestination  = "." ++ [pathSeparator],
     optFormat       = Bitcode,
     optTypeCheck    = False,
     argFilePaths    = []
@@ -90,15 +91,18 @@ compile options program
         assembly <- withContext $ \context ->
             runExceptT (withModuleFromAST context mod moduleLLVMAssembly) >>= either fail return
 
+        createDirectoryIfMissing True basePath
         writeFile (addExtension (basePath ++ baseName) "ll") assembly
     | optFormat options == Bitcode  = liftIO $ do
         bitcode <- withContext $ \context ->
             runExceptT (withModuleFromAST context mod moduleBitcode) >>= either fail return
 
+        createDirectoryIfMissing True basePath
         BS.writeFile (addExtension (basePath ++ baseName) "bc") bitcode
     | otherwise                     = error $ "format not implemented `" ++ show (optFormat options) ++ "'"
     where
+        module_     = let (Program _ module_ _) = program in map sId module_
         mod         = C.compile $ sProgram program
-        basePath    = addTrailingPathSeparator (optDestination options)
-        baseName    = takeBaseName $ sourceName (ann program)
+        basePath    = intercalate [pathSeparator] ([optDestination options] ++ init module_) ++ [pathSeparator]
+        baseName    = last module_
 

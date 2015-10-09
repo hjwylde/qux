@@ -28,6 +28,8 @@ import qualified Qux.Commands.Print     as Print
 import qualified Qux.Commands.Run       as Run
 import qualified Qux.Version            as Binary
 
+import System.FilePath
+
 
 -- * Optparse for Qux
 
@@ -86,7 +88,7 @@ build = fmap Build $ Build.Options
         ])
     <*> strOption (mconcat [
         long "destination", short 'd', metavar "DIR",
-        value "./", showDefault,
+        value ("." ++ [pathSeparator]), showDefault,
         help "Specify the output directory to put the compiled LLVM IR"
         ])
     <*> formatOption (mconcat [
@@ -117,7 +119,7 @@ compile :: Parser Command
 compile = fmap Compile $ Compile.Options
     <$> strOption (mconcat [
         long "destination", short 'd', metavar "DIR",
-        value "./", showDefault,
+        value ("." ++ [pathSeparator]), showDefault,
         help "Specify the output directory to put the compiled LLVM IR"
         ])
     <*> formatOption (mconcat [
