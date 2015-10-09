@@ -18,7 +18,6 @@ import qualified    Qux.Commands.Build      as Build
 import qualified    Qux.Commands.Check      as Check
 import qualified    Qux.Commands.Compile    as Compile
 import qualified    Qux.Commands.Print      as Print
-import qualified    Qux.Commands.Run        as Run
 
 
 -- | Main.
@@ -31,5 +30,4 @@ handle options = case argCommand options of
     Check   options -> Check.handle     options
     Compile options -> Compile.handle   options
     Print   options -> Print.handle     options
-    Run     options -> Run.handle       options
 

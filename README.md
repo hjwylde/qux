@@ -9,7 +9,6 @@ Qux is an experimental language developed from the ground up with the aim of sup
 This project provides a binary for working with the Qux language.
 It features:
 * Compiling.
-* Running (DEPRECATED).
 * Type checking.
 * Pretty printing.
 

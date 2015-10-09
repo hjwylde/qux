@@ -2,14 +2,12 @@
 
 #### Upcoming in master
 
-* Updated usage text for `qux check`.
-* Added `--entry` option to `qux run`.
+* Updated usage text for `check`.
 * Added `--numeric-version` and `--qux-version` global options.
-* Added ability to parse any valid Qux value as an argument to `qux run`.
 * Added ability to build and check multiple files at once.
-* Added program checking as default to `qux run` and option to skip it, `--skip-checks`.
 * Added `compile` command to enable compilation to LLVM IR.
-* Deprecated `qux run` (to be removed in v1.0.0.0).
+* Removed `run`. Given that this project is currently in pre-release, there may be breaking changes
+  between minor version increments.
 
 #### v0.1.0.0
 

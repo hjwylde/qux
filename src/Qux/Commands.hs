@@ -25,7 +25,6 @@ import qualified Qux.Commands.Build     as Build
 import qualified Qux.Commands.Check     as Check
 import qualified Qux.Commands.Compile   as Compile
 import qualified Qux.Commands.Print     as Print
-import qualified Qux.Commands.Run       as Run
 import qualified Qux.Version            as Binary
 
 import System.FilePath
@@ -64,8 +63,7 @@ qux = Options <$> subparser (mconcat [
     command "build"     $ info (helper <*> build)   (fullDesc <> progDesc "Build FILES using composable options"),
     command "check"     $ info (helper <*> check)   (fullDesc <> progDesc "Check FILES for correctness" <> header "Shortcut for `qux build --type-check'"),
     command "compile"   $ info (helper <*> compile) (fullDesc <> progDesc "Compile FILES into the LLVM IR" <> header "Shortcut for `qux build --compile'"),
-    command "print"     $ info (helper <*> print)   (fullDesc <> progDesc "Pretty print FILE"),
-    command "run"       $ info (helper <*> run)     (fullDesc <> progDesc "Run FILE passing in ARGS as program arguments" <> header "DEPRECATED: will be removed in v1.0.0.0")
+    command "print"     $ info (helper <*> print)   (fullDesc <> progDesc "Pretty print FILE")
     ])
 
 
@@ -75,7 +73,6 @@ data Command    = Build     Build.Options
                 | Check     Check.Options
                 | Compile   Compile.Options
                 | Print     Print.Options
-                | Run       Run.Options
 
 
 -- ** Build
@@ -159,26 +156,6 @@ print = fmap Print $ Print.Options
             "normal"    -> return PageMode
             "one-line"  -> return OneLineMode
             _           -> readerError $ "unrecognised mode `" ++ opt ++ "'"
-
--- ** Run
-
-run :: Parser Command
-run = fmap Run $ Run.Options
-    <$> strOption (mconcat [
-        long "entry", short 'e', metavar "NAME",
-        value "main", showDefault,
-        help "Specify the program entry point"
-        ])
-    <*> switch (mconcat [
-        long "skip-checks",
-        help "Skip the correctness checks (from `qux check')"
-        ])
-    <*> strArgument (mconcat [
-        metavar "FILE"
-        ])
-    <*> many (strArgument $ mconcat [
-        metavar "-- ARGS..."
-        ])
 
 
 -- ** Helpers
