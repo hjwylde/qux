@@ -19,7 +19,6 @@ import              Data.List       (intercalate)
 
 import              Language.Qux.Annotated.Parser       hiding (parse)
 import qualified    Language.Qux.Annotated.Parser       as P
-import              Language.Qux.Annotated.Simplify
 import              Language.Qux.Annotated.Syntax
 import              Language.Qux.Annotated.TypeChecker
 import qualified    Language.Qux.Llvm.Compiler          as C
@@ -101,8 +100,8 @@ compile options program
         BS.writeFile (addExtension (basePath ++ baseName) "bc") bitcode
     | otherwise                     = error $ "format not implemented `" ++ show (optFormat options) ++ "'"
     where
-        module_     = let (Program _ module_ _) = program in map sId module_
-        mod         = C.compile $ sProgram program
+        module_     = let (Program _ module_ _) = program in map simp module_
+        mod         = C.compile $ simp program
         basePath    = intercalate [pathSeparator] ([optDestination options] ++ init module_) ++ [pathSeparator]
         baseName    = last module_
 

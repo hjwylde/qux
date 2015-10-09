@@ -13,13 +13,14 @@ module Qux.Commands.Print where
 
 import Control.Monad.Except
 
-import Language.Qux.Annotated.PrettyPrinter
-
 import Qux.Commands.Build (parse)
 
 import System.Exit
 import System.IO
 import System.IO.Error
+
+import Text.PrettyPrint                 hiding (style)
+import Text.PrettyPrint.HughesPJClass   hiding (style)
 
 
 data Options = Options {

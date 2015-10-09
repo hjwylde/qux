@@ -13,8 +13,7 @@ module Qux.Commands where
 
 import Data.Version (showVersion)
 
-import              Language.Qux.Annotated.PrettyPrinter
-import qualified    Language.Qux.Version                    as Qux
+import qualified Language.Qux.Version as Qux
 
 import Options.Applicative
 import Options.Applicative.Types
@@ -28,6 +27,8 @@ import qualified Qux.Commands.Print     as Print
 import qualified Qux.Version            as Binary
 
 import System.FilePath
+
+import Text.PrettyPrint (Mode(..))
 
 
 -- * Optparse for Qux
