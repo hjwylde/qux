@@ -17,11 +17,12 @@ import Control.Monad.Identity
 import qualified    Data.ByteString as BS
 import              Data.List       (intercalate)
 
+import qualified    Language.Qux.Annotated.NameResolver     as NameResolver
 import              Language.Qux.Annotated.Parser           hiding (parse)
 import qualified    Language.Qux.Annotated.Parser           as P
 import              Language.Qux.Annotated.Syntax
 import              Language.Qux.Annotated.TypeChecker
-import              Language.Qux.Annotated.TypeResolver
+import qualified    Language.Qux.Annotated.TypeResolver     as TypeResolver
 import qualified    Language.Qux.Llvm.Compiler              as C
 
 import LLVM.General
@@ -73,7 +74,9 @@ handle options = do
         Right _     -> return ()
 
 parse :: FilePath -> String -> ExceptT String IO (Program SourcePos)
-parse filePath contents = resolve <$> mapExceptT (return . runIdentity) (withExcept show (P.parse program filePath contents))
+parse filePath contents = fmap
+    (TypeResolver.resolve . NameResolver.resolve)
+    (mapExceptT (return . runIdentity) (withExcept show (P.parse program filePath contents)))
 
 build :: Options -> Program SourcePos -> ExceptT String IO ()
 build options program = do
