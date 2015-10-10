@@ -2,12 +2,13 @@
 
 #### Upcoming in master
 
+#### v0.2.0.0
+
 * Updated usage text for `check`.
 * Added `--numeric-version` and `--qux-version` global options.
 * Added ability to build and check multiple files at once.
-* Added `compile` command to enable compilation to LLVM IR.
-* Removed `run`. Given that this project is currently in pre-release, there may be breaking changes
-  between minor version increments.
+* Added `compile` command to compile to LLVM IR.
+* Removed `run` command.
 
 #### v0.1.0.0
 
