@@ -1,5 +1,5 @@
 name:           qux
-version:        0.1.0.0
+version:        0.2.0.0
 
 author:         Henry J. Wylde
 maintainer:     public@hjwylde.com
@@ -36,7 +36,7 @@ executable qux
         containers == 0.5.*,
         directory == 1.*,
         filepath == 1.*,
-        language-qux == 0.1.*,
+        language-qux == 0.2.*,
         llvm-general == 3.4.*,
         mtl == 2.*,
         optparse-applicative == 0.11.*,
