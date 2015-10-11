@@ -11,6 +11,7 @@ Maintainer  : public@hjwylde.com
 
 module Qux.Commands where
 
+import Data.List    (nub)
 import Data.Version (showVersion)
 
 import qualified Language.Qux.Version as Qux
@@ -20,11 +21,12 @@ import Options.Applicative.Types
 
 import Prelude hiding (print)
 
-import qualified Qux.Commands.Build     as Build
-import qualified Qux.Commands.Check     as Check
-import qualified Qux.Commands.Compile   as Compile
-import qualified Qux.Commands.Print     as Print
-import qualified Qux.Version            as Binary
+import qualified Qux.Commands.Build         as Build
+import qualified Qux.Commands.Check         as Check
+import qualified Qux.Commands.Compile       as Compile
+import qualified Qux.Commands.Dependencies  as Dependencies
+import qualified Qux.Commands.Print         as Print
+import qualified Qux.Version                as Binary
 
 import System.FilePath
 
@@ -61,19 +63,21 @@ data Options = Options {
 
 qux :: Parser Options
 qux = Options <$> subparser (mconcat [
-    command "build"     $ info (helper <*> build)   (fullDesc <> progDesc "Build FILES using composable options"),
-    command "check"     $ info (helper <*> check)   (fullDesc <> progDesc "Check FILES for correctness" <> header "Shortcut for `qux build --type-check'"),
-    command "compile"   $ info (helper <*> compile) (fullDesc <> progDesc "Compile FILES into the LLVM IR" <> header "Shortcut for `qux build --compile'"),
-    command "print"     $ info (helper <*> print)   (fullDesc <> progDesc "Pretty print FILE")
+    command "build"         $ info (helper <*> build)           (fullDesc <> progDesc "Build FILES using composable options"),
+    command "check"         $ info (helper <*> check)           (fullDesc <> progDesc "Check FILES for correctness" <> header "Shortcut for `qux build --type-check'"),
+    command "compile"       $ info (helper <*> compile)         (fullDesc <> progDesc "Compile FILES into the LLVM IR" <> header "Shortcut for `qux build --compile'"),
+    command "dependencies"  $ info (helper <*> dependencies)    (fullDesc <> progDesc "Print out the dependency tree for FILES"),
+    command "print"         $ info (helper <*> print)           (fullDesc <> progDesc "Pretty print FILE")
     ])
 
 
 -- * Subcommands
 
-data Command    = Build     Build.Options
-                | Check     Check.Options
-                | Compile   Compile.Options
-                | Print     Print.Options
+data Command    = Build         Build.Options
+                | Check         Check.Options
+                | Compile       Compile.Options
+                | Dependencies  Dependencies.Options
+                | Print         Print.Options
 
 
 -- ** Build
@@ -98,9 +102,9 @@ build = fmap Build $ Build.Options
         long "type-check",
         help "Enable type checking"
         ])
-    <*> some (strArgument $ mconcat [
+    <*> fmap nub (some $ strArgument (mconcat [
         metavar "FILES..."
-        ])
+        ]))
 
 
 -- ** Check
@@ -125,9 +129,18 @@ compile = fmap Compile $ Compile.Options
         value Build.Bitcode, showDefault,
         help "Specify the LLVM output format as either `bitcode' or `assembly'"
         ])
-    <*> some (strArgument $ mconcat [
+    <*> fmap nub (some $ strArgument (mconcat [
         metavar "FILES..."
-    ])
+    ]))
+
+
+-- ** Dependencies
+
+dependencies :: Parser Command
+dependencies = fmap Dependencies $ Dependencies.Options
+    <$> fmap nub (some $ strArgument (mconcat [
+        metavar "FILES..."
+    ]))
 
 
 -- ** Print

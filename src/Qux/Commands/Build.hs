@@ -13,6 +13,7 @@ module Qux.Commands.Build where
 
 import Control.Monad.Except
 import Control.Monad.Identity
+import Control.Monad.Reader
 
 import qualified    Data.ByteString as BS
 import              Data.List       (intercalate)
@@ -26,7 +27,7 @@ import qualified    Language.Qux.Annotated.TypeResolver     as TypeResolver
 import qualified    Language.Qux.Llvm.Compiler              as C
 
 import LLVM.General
-import LLVM.General.Context
+import LLVM.General.Context hiding (Context)
 
 import System.Directory
 import System.Exit
@@ -59,6 +60,8 @@ instance Show Format where
     show Assembly   = "assembly"
     show Bitcode    = "bitcode"
 
+-- TODO (hjw): simplify all programs as early as possible
+-- TODO (hjw): re-use contexts as much as possible
 
 handle :: Options -> IO ()
 handle options = do
@@ -66,7 +69,7 @@ handle options = do
     fileContents <- mapM readFile filePaths
 
     ethr <- catchIOError
-        (runExceptT $ zipWithM parse filePaths fileContents >>= mapM_ (build options))
+        (runExceptT $ zipWithM parse filePaths fileContents >>= resolveAll >>= build options)
         (return . Left . ioeGetErrorString)
 
     case ethr of
@@ -74,22 +77,28 @@ handle options = do
         Right _     -> return ()
 
 parse :: FilePath -> String -> ExceptT String IO (Program SourcePos)
-parse filePath contents = fmap
-    (TypeResolver.resolve . NameResolver.resolve)
-    (mapExceptT (return . runIdentity) (withExcept show (P.parse program filePath contents)))
+parse filePath contents = mapExceptT (return . runIdentity) (withExcept show (P.parse program filePath contents))
 
-build :: Options -> Program SourcePos -> ExceptT String IO ()
-build options program = do
-    when (optTypeCheck options) $ typeCheck program
-    when (optCompile options)   $ compile options program
-
-typeCheck :: Program SourcePos -> ExceptT String IO ()
-typeCheck program = when (not $ null errors) $ throwError (intercalate "\n\n" $ map show errors)
+resolveAll :: [Program SourcePos] -> ExceptT String IO [Program SourcePos]
+resolveAll programs = mapM (return . typeResolve . nameResolve) programs
     where
-        errors = check program
+        nameResolve program = NameResolver.runResolve (NameResolver.resolveProgram program) (NameResolver.context (simp program) (map simp programs))
+        typeResolve program = TypeResolver.runResolve (TypeResolver.resolveProgram program) (context (simp program) (map simp programs))
 
-compile :: Options -> Program SourcePos -> ExceptT String IO ()
-compile options program
+build :: Options -> [Program SourcePos] -> ExceptT String IO ()
+build options programs = do
+    let baseContext' = baseContext $ map simp programs
+
+    when (optTypeCheck options) $ mapM_ (\p@(Program _ m _) -> typeCheck (baseContext' { module_ = map simp m }) p) programs
+    when (optCompile options)   $ mapM_ (\p@(Program _ m _) -> compile options (baseContext' { module_ = map simp m }) p) programs
+
+typeCheck :: Context -> Program SourcePos -> ExceptT String IO ()
+typeCheck context program = when (not $ null errors) $ throwError (intercalate "\n\n" $ map show errors)
+    where
+        errors = execCheck (checkProgram program) context
+
+compile :: Options -> Context -> Program SourcePos -> ExceptT String IO ()
+compile options context program
     | optFormat options == Assembly = liftIO $ do
         assembly <- withContext $ \context ->
             runExceptT (withModuleFromAST context mod moduleLLVMAssembly) >>= either fail return
@@ -102,10 +111,10 @@ compile options program
 
         createDirectoryIfMissing True basePath
         BS.writeFile (addExtension (basePath ++ baseName) "bc") bitcode
-    | otherwise                     = error $ "format not implemented `" ++ show (optFormat options) ++ "'"
+    | otherwise                     = error $ "internal error: format not implemented `" ++ show (optFormat options) ++ "'"
     where
         module_     = let (Program _ module_ _) = program in map simp module_
-        mod         = C.compile $ simp program
+        mod         = runReader (C.compileProgram $ simp program) context
         basePath    = intercalate [pathSeparator] ([optDestination options] ++ init module_) ++ [pathSeparator]
         baseName    = last module_
 

@@ -11,11 +11,6 @@ Maintainer  : public@hjwylde.com
 
 module Qux.Commands.Check where
 
-import Control.Monad.Except
-
-import Language.Qux.Annotated.Parser
-import Language.Qux.Annotated.Syntax
-
 import qualified Qux.Commands.Build as Build
 
 
@@ -25,9 +20,6 @@ data Options = Options {
 
 handle :: Options -> IO ()
 handle options = Build.handle $ buildOptions options
-
-check :: Options -> Program SourcePos -> ExceptT String IO ()
-check options = Build.build $ buildOptions options
 
 buildOptions :: Options -> Build.Options
 buildOptions options = Build.defaultOptions {

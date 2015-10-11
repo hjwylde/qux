@@ -26,6 +26,7 @@ executable qux
         Qux.Commands.Build,
         Qux.Commands.Check,
         Qux.Commands.Compile,
+        Qux.Commands.Dependencies,
         Qux.Commands.Print,
         Qux.Version
 
