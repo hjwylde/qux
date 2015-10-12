@@ -60,6 +60,7 @@ quxInfo = info (infoOptions <*> qux) (fullDesc <> noIntersperse)
 data Options = Options {
     argCommand :: Command
     }
+    deriving (Eq, Show)
 
 qux :: Parser Options
 qux = Options <$> subparser (mconcat [
@@ -78,6 +79,7 @@ data Command    = Build         Build.Options
                 | Compile       Compile.Options
                 | Dependencies  Dependencies.Options
                 | Print         Print.Options
+    deriving (Eq, Show)
 
 
 -- ** Build

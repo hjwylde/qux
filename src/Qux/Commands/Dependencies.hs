@@ -32,7 +32,7 @@ import System.IO.Error
 data Options = Options {
     argFilePaths    :: [FilePath]
     }
-
+    deriving (Eq, Show)
 
 handle :: Options -> IO ()
 handle options = do

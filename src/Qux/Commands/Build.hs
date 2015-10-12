@@ -43,6 +43,7 @@ data Options = Options {
     optTypeCheck    :: Bool,
     argFilePaths    :: [FilePath]
     }
+    deriving (Eq, Show)
 
 defaultOptions :: Options
 defaultOptions = Options {

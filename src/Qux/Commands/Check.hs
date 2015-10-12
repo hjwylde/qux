@@ -17,6 +17,7 @@ import qualified Qux.Commands.Build as Build
 data Options = Options {
     argFilePaths :: [FilePath]
     }
+    deriving (Eq, Show)
 
 handle :: Options -> IO ()
 handle options = Build.handle $ buildOptions options

@@ -29,6 +29,7 @@ data Options = Options {
     optRibbonsPerLine   :: Float,
     argFilePath         :: FilePath
     }
+    deriving (Eq, Show)
 
 handle :: Options -> IO ()
 handle options = do

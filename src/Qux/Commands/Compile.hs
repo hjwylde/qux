@@ -19,6 +19,7 @@ data Options = Options {
     optFormat       :: Build.Format,
     argFilePaths    :: [FilePath]
     }
+    deriving (Eq, Show)
 
 handle :: Options -> IO ()
 handle options = Build.handle $ buildOptions options
