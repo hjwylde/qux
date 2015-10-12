@@ -70,7 +70,7 @@ handle options = do
     fileContents <- mapM readFile filePaths
 
     ethr <- catchIOError
-        (runExceptT $ zipWithM parse filePaths fileContents >>= resolveAll >>= build options)
+        (runExceptT $ zipWithM parse filePaths fileContents >>= resolveNames >>= resolveTypes >>= build options)
         (return . Left . ioeGetErrorString)
 
     case ethr of
@@ -80,11 +80,24 @@ handle options = do
 parse :: FilePath -> String -> ExceptT String IO (Program SourcePos)
 parse filePath contents = mapExceptT (return . runIdentity) (withExcept show (P.parse program filePath contents))
 
-resolveAll :: [Program SourcePos] -> ExceptT String IO [Program SourcePos]
-resolveAll programs = mapM (return . typeResolve . nameResolve) programs
+resolveNames :: [Program SourcePos] -> ExceptT String IO [Program SourcePos]
+resolveNames programs = mapM resolve programs
     where
-        nameResolve program = NameResolver.runResolve (NameResolver.resolveProgram program) (NameResolver.context (simp program) (map simp programs))
-        typeResolve program = TypeResolver.runResolve (TypeResolver.resolveProgram program) (context (simp program) (map simp programs))
+        resolve :: Program SourcePos -> ExceptT String IO (Program SourcePos)
+        resolve program = do
+            let context'            = NameResolver.context (simp program) (map simp programs)
+            let (program', errors)  = NameResolver.runResolve (NameResolver.resolveProgram program) context'
+
+            when (not $ null errors) $ throwError (intercalate "\n\n" $ map show errors)
+
+            return program'
+
+resolveTypes :: [Program SourcePos] -> ExceptT String IO [Program SourcePos]
+resolveTypes programs = mapM resolve programs
+    where
+        baseContext' = baseContext (map simp programs)
+        resolve :: Program SourcePos -> ExceptT String IO (Program SourcePos)
+        resolve program@(Program _ m _) = return $ TypeResolver.runResolve (TypeResolver.resolveProgram program) (baseContext' { module_ = map simp m })
 
 build :: Options -> [Program SourcePos] -> ExceptT String IO ()
 build options programs = do
