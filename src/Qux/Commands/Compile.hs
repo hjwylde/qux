@@ -21,6 +21,7 @@ data Options = Options {
     }
     deriving (Eq, Show)
 
+
 handle :: Options -> IO ()
 handle options = Build.handle $ buildOptions options
 

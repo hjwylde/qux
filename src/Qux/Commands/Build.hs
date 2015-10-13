@@ -54,6 +54,7 @@ defaultOptions = Options {
     argFilePaths    = []
     }
 
+
 data Format = Assembly | Bitcode
     deriving Eq
 
@@ -61,8 +62,6 @@ instance Show Format where
     show Assembly   = "assembly"
     show Bitcode    = "bitcode"
 
--- TODO (hjw): simplify all programs as early as possible
--- TODO (hjw): re-use contexts as much as possible
 
 handle :: Options -> IO ()
 handle options = do
@@ -70,7 +69,7 @@ handle options = do
     fileContents <- mapM readFile filePaths
 
     ethr <- catchIOError
-        (runExceptT $ zipWithM parse filePaths fileContents >>= resolveNames >>= resolveTypes >>= build options)
+        (runExceptT $ zipWithM parse filePaths fileContents >>= build options)
         (return . Left . ioeGetErrorString)
 
     case ethr of
@@ -80,38 +79,26 @@ handle options = do
 parse :: FilePath -> String -> ExceptT String IO (Program SourcePos)
 parse filePath contents = mapExceptT (return . runIdentity) (withExcept show (P.parse program filePath contents))
 
-resolveNames :: [Program SourcePos] -> ExceptT String IO [Program SourcePos]
-resolveNames programs = mapM resolve programs
-    where
-        resolve :: Program SourcePos -> ExceptT String IO (Program SourcePos)
-        resolve program = do
-            let context'            = NameResolver.context (simp program) (map simp programs)
-            let (program', errors)  = NameResolver.runResolve (NameResolver.resolveProgram program) context'
-
-            when (not $ null errors) $ throwError (intercalate "\n\n" $ map show errors)
-
-            return program'
-
-resolveTypes :: [Program SourcePos] -> ExceptT String IO [Program SourcePos]
-resolveTypes programs = mapM resolve programs
-    where
-        baseContext'                    = baseContext (map simp programs)
-
-        resolve :: Program SourcePos -> ExceptT String IO (Program SourcePos)
-        resolve program@(Program _ m _) = do
-            let context'            = baseContext' { module_ = map simp m }
-            let (program', errors)  = TypeResolver.runResolve (TypeResolver.resolveProgram program) context'
-
-            when (not $ null errors) $ throwError (intercalate "\n\n" $ map show errors)
-
-            return program'
-
 build :: Options -> [Program SourcePos] -> ExceptT String IO ()
-build options programs = do
-    let baseContext' = baseContext $ map simp programs
+build options unresolvedPrograms = do
+    let context = baseContext $ map simp unresolvedPrograms
 
-    when (optTypeCheck options) $ mapM_ (\p@(Program _ m _) -> typeCheck (baseContext' { module_ = map simp m }) p) programs
-    when (optCompile options)   $ mapM_ (\p@(Program _ m _) -> compile options (baseContext' { module_ = map simp m }) p) programs
+    programs <- mapM (resolve context) unresolvedPrograms
+
+    when (optTypeCheck options) $ mapM_ (\program -> typeCheck (narrowContext context (simp program)) program) programs
+    when (optCompile options)   $ mapM_ (\program -> compile options (narrowContext context (simp program)) program) programs
+
+resolve :: Context -> Program SourcePos -> ExceptT String IO (Program SourcePos)
+resolve baseContext program = do
+    let (program', errors') = NameResolver.runResolve (NameResolver.resolveProgram program) context
+    when (not $ null errors') $ throwError (intercalate "\n\n" $ map show errors')
+
+    let (program'', errors'') = TypeResolver.runResolve (TypeResolver.resolveProgram program') context
+    when (not $ null errors'') $ throwError (intercalate "\n\n" $ map show errors'')
+
+    return program''
+    where
+        context = narrowContext baseContext (simp program)
 
 typeCheck :: Context -> Program SourcePos -> ExceptT String IO ()
 typeCheck context program = when (not $ null errors) $ throwError (intercalate "\n\n" $ map show errors)

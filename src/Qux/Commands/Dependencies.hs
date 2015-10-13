@@ -34,6 +34,7 @@ data Options = Options {
     }
     deriving (Eq, Show)
 
+
 handle :: Options -> IO ()
 handle options = do
     let filePaths = argFilePaths options
