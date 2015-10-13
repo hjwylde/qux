@@ -95,9 +95,16 @@ resolveNames programs = mapM resolve programs
 resolveTypes :: [Program SourcePos] -> ExceptT String IO [Program SourcePos]
 resolveTypes programs = mapM resolve programs
     where
-        baseContext' = baseContext (map simp programs)
+        baseContext'                    = baseContext (map simp programs)
+
         resolve :: Program SourcePos -> ExceptT String IO (Program SourcePos)
-        resolve program@(Program _ m _) = return $ TypeResolver.runResolve (TypeResolver.resolveProgram program) (baseContext' { module_ = map simp m })
+        resolve program@(Program _ m _) = do
+            let context'            = baseContext' { module_ = map simp m }
+            let (program', errors)  = TypeResolver.runResolve (TypeResolver.resolveProgram program) context'
+
+            when (not $ null errors) $ throwError (intercalate "\n\n" $ map show errors)
+
+            return program'
 
 build :: Options -> [Program SourcePos] -> ExceptT String IO ()
 build options programs = do
