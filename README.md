@@ -11,6 +11,7 @@ It features:
 * Compiling.
 * Type checking.
 * Pretty printing.
+* Dependency printing.
 
 For help on how to call `qux`, see `qux --help`.
 

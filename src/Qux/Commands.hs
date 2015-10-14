@@ -26,7 +26,7 @@ import qualified Qux.Commands.Check         as Check
 import qualified Qux.Commands.Compile       as Compile
 import qualified Qux.Commands.Dependencies  as Dependencies
 import qualified Qux.Commands.Print         as Print
-import qualified Qux.Version                as Binary
+import qualified Qux.Version                as This
 
 import System.FilePath
 
@@ -42,11 +42,11 @@ quxInfo :: ParserInfo Options
 quxInfo = info (infoOptions <*> qux) (fullDesc <> noIntersperse)
     where
         infoOptions = helper <*> version <*> numericVersion <*> quxVersion
-        version = infoOption ("Version " ++ showVersion Binary.version) $ mconcat [
+        version = infoOption ("Version " ++ showVersion This.version) $ mconcat [
             long "version", short 'V', hidden,
             help "Show this binary's version"
             ]
-        numericVersion = infoOption (showVersion Binary.version) $ mconcat [
+        numericVersion = infoOption (showVersion This.version) $ mconcat [
             long "numeric-version", hidden,
             help "Show this binary's version (without the prefix)"
             ]
@@ -57,9 +57,7 @@ quxInfo = info (infoOptions <*> qux) (fullDesc <> noIntersperse)
 
 -- * Command
 
-data Options = Options {
-    argCommand :: Command
-    }
+data Options = Options { argCommand :: Command }
     deriving (Eq, Show)
 
 qux :: Parser Options

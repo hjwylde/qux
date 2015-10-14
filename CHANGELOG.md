@@ -3,7 +3,7 @@
 #### Upcoming in master
 
 * Added in support for import statements.
-* Added in `dependencies` command that prints out a tree of the file relationships.
+* Added in `dependencies` command that prints out a list of the file dependencies.
 
 #### v0.2.0.0
 

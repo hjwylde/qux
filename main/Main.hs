@@ -21,7 +21,6 @@ import qualified    Qux.Commands.Dependencies   as Dependencies
 import qualified    Qux.Commands.Print          as Print
 
 
--- | Main.
 main :: IO ()
 main = customExecParser quxPrefs quxInfo >>= handle
 
