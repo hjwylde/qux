@@ -11,18 +11,15 @@ Maintainer  : public@hjwylde.com
 
 module Qux.Commands.Dependencies where
 
-import Control.Monad.Except
-
 import Data.List.Extra (nubOrd, sort)
 
 import Language.Qux.Annotated.Parser
 import Language.Qux.Annotated.Syntax
 
-import qualified Qux.Commands.Build as Build
+import Pipes
 
-import System.Exit
-import System.IO
-import System.IO.Error
+import qualified    Qux.Commands.Build as Build
+import              Qux.Worker
 
 
 data Options = Options {
@@ -32,23 +29,11 @@ data Options = Options {
 
 
 handle :: Options -> IO ()
-handle options = do
-    let filePaths = argFilePaths options
-    fileContents <- mapM readFile filePaths
+handle options = runWorkerT $ Build.parseAll (argFilePaths options) >>= dependencies
 
-    ethr <- catchIOError
-        (runExceptT $ zipWithM Build.parse filePaths fileContents >>= dependencies options)
-        (return . Left . ioeGetErrorString)
-
-    case ethr of
-        Left error  -> hPutStrLn stderr error >> exitFailure
-        Right _     -> return ()
-
-dependencies :: Options -> [Program SourcePos] -> ExceptT String IO ()
-dependencies _ programs = liftIO $ mapM_ putStrLn imports
-    where
-        imports = nubOrd $ sort [simp (qualify id) |
-            (Program _ _ decls) <- programs,
-            (ImportDecl _ id) <- decls
-            ]
+dependencies :: [Program SourcePos] -> WorkerT IO ()
+dependencies programs = each $ nubOrd (sort [simp (qualify id) |
+    (Program _ _ decls) <- programs,
+    (ImportDecl _ id) <- decls
+    ])
 

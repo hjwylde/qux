@@ -13,14 +13,16 @@ module Qux.Commands.Print where
 
 import Control.Monad.Except
 
-import Qux.Commands.Build (parse)
+import Language.Qux.Annotated.Parser (SourcePos)
+import Language.Qux.Annotated.Syntax
 
-import System.Exit
-import System.IO
-import System.IO.Error
+import Prelude hiding (print)
 
-import Text.PrettyPrint                 hiding (style)
-import Text.PrettyPrint.HughesPJClass   hiding (style)
+import qualified    Qux.Commands.Build as Build
+import              Qux.Worker
+
+import Text.PrettyPrint
+import Text.PrettyPrint.HughesPJClass
 
 
 data Options = Options {
@@ -33,22 +35,14 @@ data Options = Options {
 
 
 handle :: Options -> IO ()
-handle options = do
-    let filePath = argFilePath options
-    contents <- readFile $ argFilePath options
+handle options = runWorkerT $ Build.parse (argFilePath options) >>= print options
 
-    ethr <- catchIOError
-        (runExceptT $ parse filePath contents)
-        (return . Left . ioeGetErrorString)
-
-    case ethr of
-        Left error      -> hPutStrLn stderr (show error) >> exitFailure
-        Right program   -> putStrLn $ renderStyle (style options) (pPrint program)
-
-style :: Options -> Style
-style options = Style {
-    mode            = optMode options,
-    lineLength      = optLineLength options,
-    ribbonsPerLine  = optRibbonsPerLine options
-    }
+print :: Options -> Program SourcePos -> WorkerT IO ()
+print options program = liftIO $ putStrLn (renderStyle style (pPrint program))
+    where
+        style = Style {
+            mode            = optMode options,
+            lineLength      = optLineLength options,
+            ribbonsPerLine  = optRibbonsPerLine options
+            }
 
