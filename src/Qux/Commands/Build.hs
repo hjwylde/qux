@@ -33,7 +33,7 @@ import Pipes
 
 import Qux.Worker
 
-import System.Directory
+import System.Directory.Extra
 import System.Exit
 import System.FilePath
 
@@ -42,6 +42,7 @@ data Options = Options {
     optCompile      :: Bool,
     optDestination  :: FilePath,
     optFormat       :: Format,
+    optLibdirs      :: [FilePath],
     optTypeCheck    :: Bool,
     argFilePaths    :: [FilePath]
     }
@@ -52,6 +53,7 @@ defaultOptions = Options {
     optCompile      = False,
     optDestination  = "." ++ [pathSeparator],
     optFormat       = Bitcode,
+    optLibdirs      = [],
     optTypeCheck    = False,
     argFilePaths    = []
     }
@@ -66,12 +68,23 @@ instance Show Format where
 
 
 handle :: Options -> IO ()
-handle options = runWorkerT $ readAll (argFilePaths options) >>= build options
+handle options = runWorkerT $ do
+    libraryFilePaths <- liftIO $ concat <$> mapM listFilesRecursive (optLibdirs options)
 
-build :: Options -> [Program SourcePos] -> WorkerT IO ()
-build options programs = do
-    when (optTypeCheck options) $ mapM_ (\program -> typeCheck (context (map simp programs) (simp program)) program) programs
-    when (optCompile options)   $ mapM_ (\program -> compile options (context (map simp programs) (simp program)) program) programs
+    programs    <- parseAll $ argFilePaths options
+    libraries   <- parseAll $ filter ((== ".qux") . takeExtension) libraryFilePaths
+
+    build options programs libraries
+
+build :: Options -> [Program SourcePos] -> [Program SourcePos] -> WorkerT IO ()
+build options programs libraries = do
+    programs'   <- mapM (resolve baseContext') programs
+
+    when (optTypeCheck options) $ mapM_ (\program -> typeCheck (pContext program) program) programs'
+    when (optCompile options)   $ mapM_ (\program -> compile options (pContext program) program) programs'
+    where
+        baseContext'    = baseContext $ map simp (programs ++ libraries)
+        pContext        = narrowContext baseContext' . simp
 
 typeCheck :: Context -> Program SourcePos -> WorkerT IO ()
 typeCheck context program = when (not $ null errors) $ do
@@ -102,9 +115,6 @@ compile options context program
         baseName    = last module_
 
 
-readAll :: [FilePath] -> WorkerT IO [Program SourcePos]
-readAll filePaths = parseAll filePaths >>= resolveAll
-
 parseAll :: [FilePath] -> WorkerT IO [Program SourcePos]
 parseAll = mapM parse
 
@@ -119,11 +129,6 @@ parse filePath = do
     case runExcept (P.parse program filePath contents) of
         Left error      -> yield (show error) >> throwError (ExitFailure 1)
         Right program   -> return program
-
-resolveAll :: [Program SourcePos] -> WorkerT IO [Program SourcePos]
-resolveAll programs = mapM (resolve baseContext') programs
-    where
-        baseContext' = baseContext $ map simp programs
 
 resolve :: Context -> Program SourcePos -> WorkerT IO (Program SourcePos)
 resolve baseContext program = do

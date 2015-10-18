@@ -17,6 +17,7 @@ import qualified Qux.Commands.Build as Build
 data Options = Options {
     optDestination  :: FilePath,
     optFormat       :: Build.Format,
+    optLibdirs      :: [FilePath],
     argFilePaths    :: [FilePath]
     }
     deriving (Eq, Show)
@@ -30,6 +31,8 @@ buildOptions options = Build.defaultOptions {
     Build.optCompile        = True,
     Build.optDestination    = optDestination options,
     Build.optFormat         = optFormat options,
+    Build.optLibdirs        = optLibdirs options,
+    Build.optTypeCheck      = True,
     Build.argFilePaths      = argFilePaths options
     }
 

@@ -64,7 +64,7 @@ qux :: Parser Options
 qux = Options <$> subparser (mconcat [
     command "build"         $ info (helper <*> build)           (fullDesc <> progDesc "Build FILES using composable options"),
     command "check"         $ info (helper <*> check)           (fullDesc <> progDesc "Check FILES for correctness" <> header "Shortcut for `qux build --type-check'"),
-    command "compile"       $ info (helper <*> compile)         (fullDesc <> progDesc "Compile FILES into the LLVM IR" <> header "Shortcut for `qux build --compile'"),
+    command "compile"       $ info (helper <*> compile)         (fullDesc <> progDesc "Compile FILES into the LLVM IR" <> header "Shortcut for `qux build --compile --type-check'"),
     command "dependencies"  $ info (helper <*> dependencies)    (fullDesc <> progDesc "Print out the dependency tree for FILES"),
     command "print"         $ info (helper <*> print)           (fullDesc <> progDesc "Pretty print FILE")
     ])
@@ -98,12 +98,17 @@ build = fmap Build $ Build.Options
         value Build.Bitcode, showDefault,
         help "Specify the LLVM output format as either `bitcode' or `assembly'"
         ])
+    <*> fmap (\path -> if null path then [] else nub $ splitSearchPath path) (strOption $ mconcat [
+        long "libpath", short 'l', metavar "PATH",
+        value "",
+        help "Specify a path separated list of where to try find referenced libraries"
+        ])
     <*> switch (mconcat [
         long "type-check",
         help "Enable type checking"
         ])
     <*> fmap nub (some $ strArgument (mconcat [
-        metavar "FILES..."
+        metavar "-- FILES..."
         ]))
 
 
@@ -129,8 +134,13 @@ compile = fmap Compile $ Compile.Options
         value Build.Bitcode, showDefault,
         help "Specify the LLVM output format as either `bitcode' or `assembly'"
         ])
+    <*> fmap (\path -> if null path then [] else nub $ splitSearchPath path) (strOption $ mconcat [
+        long "libpath", short 'l', metavar "PATH",
+        value "",
+        help "Specify a path separated list of where to try find referenced libraries"
+        ])
     <*> fmap nub (some $ strArgument (mconcat [
-        metavar "FILES..."
+        metavar "-- FILES..."
     ]))
 
 
