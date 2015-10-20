@@ -1,10 +1,13 @@
 
 {-|
 Module      : Qux.Commands.Compile
+Description : Options and handler for the compile subcommand.
 
 Copyright   : (c) Henry J. Wylde, 2015
 License     : BSD3
 Maintainer  : public@hjwylde.com
+
+Options and handler for the compile subcommand.
 -}
 
 module Qux.Commands.Compile (
@@ -18,17 +21,21 @@ module Qux.Commands.Compile (
 import qualified Qux.Commands.Build as Build
 
 
+-- | Compile options.
 data Options = Options {
-    optDestination  :: FilePath,
-    optFormat       :: Build.Format,
-    optLibdirs      :: [FilePath],
-    argFilePaths    :: [FilePath]
+    optDestination  :: FilePath,        -- ^ The destination folder to write the compiled files.
+    optFormat       :: Build.Format,    -- ^ The output format.
+    optLibdirs      :: [FilePath],      -- ^ Directories to search for extra library files to reference (but not to compile).
+    argFilePaths    :: [FilePath]       -- ^ The files to compile.
     }
     deriving (Eq, Show)
 
 
+-- | Calls 'Build.handle', passing it the default options along with the compile options.
+--   This also sets the flag to type check the files.
 handle :: Options -> IO ()
 handle options = Build.handle $ buildOptions options
+
 
 buildOptions :: Options -> Build.Options
 buildOptions options = Build.defaultOptions {

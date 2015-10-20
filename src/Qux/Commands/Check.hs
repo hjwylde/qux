@@ -1,10 +1,13 @@
 
 {-|
 Module      : Qux.Commands.Check
+Description : Options and handler for the check subcommand.
 
 Copyright   : (c) Henry J. Wylde, 2015
 License     : BSD3
 Maintainer  : public@hjwylde.com
+
+Options and handler for the check subcommand.
 -}
 
 module Qux.Commands.Check (
@@ -18,14 +21,17 @@ module Qux.Commands.Check (
 import qualified Qux.Commands.Build as Build
 
 
+-- | Check options.
 data Options = Options {
-    argFilePaths :: [FilePath]
+    argFilePaths :: [FilePath] -- ^ The files to type check.
     }
     deriving (Eq, Show)
 
 
+-- | Calls 'Build.handle', passing it the default options with a flag to type check the files.
 handle :: Options -> IO ()
 handle options = Build.handle $ buildOptions options
+
 
 buildOptions :: Options -> Build.Options
 buildOptions options = Build.defaultOptions {

@@ -1,10 +1,13 @@
 
 {-|
 Module      : Qux.Commands
+Description : Optparse utilities for the qux command.
 
 Copyright   : (c) Henry J. Wylde, 2015
 License     : BSD3
 Maintainer  : public@hjwylde.com
+
+Optparse utilities for the qux command.
 -}
 
 module Qux.Commands (
@@ -12,7 +15,7 @@ module Qux.Commands (
     Options(..), Command(..),
 
     -- * Optparse for Qux
-    qux, quxPrefs, quxInfo,
+    quxPrefs, quxInfo, qux,
 ) where
 
 import Data.List    (nub)
@@ -37,9 +40,11 @@ import System.FilePath
 import Text.PrettyPrint (Mode(..))
 
 
+-- | A command.
 data Options = Options { argCommand :: Command }
     deriving (Eq, Show)
 
+-- | A command and associated options.
 data Command    = Build         Build.Options
                 | Check         Check.Options
                 | Compile       Compile.Options
@@ -48,18 +53,12 @@ data Command    = Build         Build.Options
     deriving (Eq, Show)
 
 
-qux :: Parser Options
-qux = Options <$> subparser (mconcat [
-    command "build"         $ info (helper <*> build)           (fullDesc <> progDesc "Build FILES using composable options"),
-    command "check"         $ info (helper <*> check)           (fullDesc <> progDesc "Check FILES for correctness" <> header "Shortcut for `qux build --type-check'"),
-    command "compile"       $ info (helper <*> compile)         (fullDesc <> progDesc "Compile FILES into the LLVM IR" <> header "Shortcut for `qux build --compile --type-check'"),
-    command "dependencies"  $ info (helper <*> dependencies)    (fullDesc <> progDesc "Print out the dependency tree for FILES"),
-    command "print"         $ info (helper <*> print)           (fullDesc <> progDesc "Pretty print FILE")
-    ])
-
+-- | The default preferences.
+--   Limits the help output to 100 columns.
 quxPrefs :: ParserPrefs
 quxPrefs = prefs $ columns 100
 
+-- | An optparse parser of a qux command.
 quxInfo :: ParserInfo Options
 quxInfo = info (infoOptions <*> qux) (fullDesc <> noIntersperse)
     where
@@ -76,6 +75,16 @@ quxInfo = info (infoOptions <*> qux) (fullDesc <> noIntersperse)
             long "qux-version", hidden,
             help "Show the qux version this binary was compiled with"
             ]
+
+-- | A command subparser.
+qux :: Parser Options
+qux = Options <$> subparser (mconcat [
+    command "build"         $ info (helper <*> build)           (fullDesc <> progDesc "Build FILES using composable options"),
+    command "check"         $ info (helper <*> check)           (fullDesc <> progDesc "Check FILES for correctness" <> header "Shortcut for `qux build --type-check'"),
+    command "compile"       $ info (helper <*> compile)         (fullDesc <> progDesc "Compile FILES into the LLVM IR" <> header "Shortcut for `qux build --compile --type-check'"),
+    command "dependencies"  $ info (helper <*> dependencies)    (fullDesc <> progDesc "Print out the dependency tree for FILES"),
+    command "print"         $ info (helper <*> print)           (fullDesc <> progDesc "Pretty print FILE")
+    ])
 
 
 -- Subcommands
@@ -110,9 +119,10 @@ build = fmap Build $ Build.Options
         ]))
 
 check :: Parser Command
-check = Check . Check.Options <$> some (strArgument $ mconcat [
-    metavar "FILES..."
-    ])
+check = Check . Check.Options . nub
+    <$> some (strArgument $ mconcat [
+        metavar "FILES..."
+        ])
 
 compile :: Parser Command
 compile = fmap Compile $ Compile.Options
@@ -133,13 +143,13 @@ compile = fmap Compile $ Compile.Options
         ])
     <*> fmap nub (some $ strArgument (mconcat [
         metavar "-- FILES..."
-    ]))
+        ]))
 
 dependencies :: Parser Command
-dependencies = fmap Dependencies $ Dependencies.Options
-    <$> fmap nub (some $ strArgument (mconcat [
+dependencies = Dependencies . Dependencies.Options . nub
+    <$> some (strArgument $ mconcat [
         metavar "FILES..."
-    ]))
+        ])
 
 print :: Parser Command
 print = fmap Print $ Print.Options

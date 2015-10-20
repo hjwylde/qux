@@ -1,10 +1,13 @@
 
 {-|
 Module      : Qux.Commands.Dependencies
+Description : Options and handler for the dependencies subcommand.
 
 Copyright   : (c) Henry J. Wylde, 2015
 License     : BSD3
 Maintainer  : public@hjwylde.com
+
+Options and handler for the dependencies subcommand.
 -}
 
 module Qux.Commands.Dependencies (
@@ -26,14 +29,17 @@ import qualified    Qux.Commands.Build as Build
 import              Qux.Worker
 
 
+-- | Dependencies options.
 data Options = Options {
     argFilePaths :: [FilePath]
     }
     deriving (Eq, Show)
 
 
+-- | Prints out the file dependencies according to the options.
 handle :: Options -> IO ()
 handle options = runWorkerT $ Build.parseAll (argFilePaths options) >>= dependencies
+
 
 dependencies :: [Program SourcePos] -> WorkerT IO ()
 dependencies programs = each $ nubOrd (sort [simp (qualify id) |

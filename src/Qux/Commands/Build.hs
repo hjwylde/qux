@@ -1,16 +1,21 @@
 
 {-|
 Module      : Qux.Commands.Build
+Description : Options and handler for the build subcommand.
 
 Copyright   : (c) Henry J. Wylde, 2015
 License     : BSD3
 Maintainer  : public@hjwylde.com
+
+Options and handler for the build subcommand.
 -}
 
 module Qux.Commands.Build (
     -- * Options
-    Options(..), Format(..),
+    Options(..),
     defaultOptions,
+
+    Format(..),
 
     -- * Handle
     handle,
@@ -46,20 +51,22 @@ import System.Exit
 import System.FilePath
 
 
+-- | Build options.
 data Options = Options {
-    optCompile      :: Bool,
-    optDestination  :: FilePath,
-    optFormat       :: Format,
-    optLibdirs      :: [FilePath],
-    optTypeCheck    :: Bool,
-    argFilePaths    :: [FilePath]
+    optCompile      :: Bool,        -- ^ Flag for compiling to LLVM.
+    optDestination  :: FilePath,    -- ^ The destination folder to write the compiled files.
+    optFormat       :: Format,      -- ^ The output format.
+    optLibdirs      :: [FilePath],  -- ^ Directories to search for extra library files to reference (but not to compile).
+    optTypeCheck    :: Bool,        -- ^ Flag for type checking the files.
+    argFilePaths    :: [FilePath]   -- ^ The files to compile.
     }
     deriving (Eq, Show)
 
+-- | The default build options.
 defaultOptions :: Options
 defaultOptions = Options {
     optCompile      = False,
-    optDestination  = "." ++ [pathSeparator],
+    optDestination  = ".",
     optFormat       = Bitcode,
     optLibdirs      = [],
     optTypeCheck    = False,
@@ -67,6 +74,7 @@ defaultOptions = Options {
     }
 
 
+-- | Output format for the compiled LLVM code.
 data Format = Assembly | Bitcode
     deriving Eq
 
@@ -75,6 +83,7 @@ instance Show Format where
     show Bitcode    = "bitcode"
 
 
+-- | Builds the files according to the options.
 handle :: Options -> IO ()
 handle options = runWorkerT $ do
     libraryFilePaths <- liftIO $ concat <$> mapM listFilesRecursive (optLibdirs options)
@@ -83,6 +92,7 @@ handle options = runWorkerT $ do
     libraries   <- parseAll $ filter ((== ".qux") . takeExtension) libraryFilePaths
 
     build options programs libraries
+
 
 build :: Options -> [Program SourcePos] -> [Program SourcePos] -> WorkerT IO ()
 build options programs libraries = do
@@ -95,11 +105,12 @@ build options programs libraries = do
         pContext        = narrowContext baseContext' . simp
 
 typeCheck :: Context -> Program SourcePos -> WorkerT IO ()
-typeCheck context program = when (not $ null errors) $ do
-    each $ intersperse "" (map show errors)
-    throwError $ ExitFailure 1
-    where
-        errors = execCheck (checkProgram program) context
+typeCheck context program = do
+    let errors = execCheck (checkProgram program) context
+
+    when (not $ null errors) $ do
+        each $ intersperse "" (map show errors)
+        throwError $ ExitFailure 1
 
 compile :: Options -> Context -> Program SourcePos -> WorkerT IO ()
 compile options context program
@@ -123,6 +134,10 @@ compile options context program
         baseName    = last module_
 
 
+-- Helper methods
+
+-- | Parses the file.
+--   Returns the program if successful or yields the error message(s).
 parse :: FilePath -> WorkerT IO (Program SourcePos)
 parse filePath = do
     whenM (not <$> liftIO (doesFileExist filePath)) $ do
@@ -135,6 +150,8 @@ parse filePath = do
         Left error      -> yield (show error) >> throwError (ExitFailure 1)
         Right program   -> return program
 
+-- | Parses the files.
+--   Returns the programs if successful or yields the error message(s).
 parseAll :: [FilePath] -> WorkerT IO [Program SourcePos]
 parseAll = mapM parse
 

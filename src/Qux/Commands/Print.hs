@@ -1,10 +1,13 @@
 
 {-|
 Module      : Qux.Commands.Print
+Description : Options and handler for the print subcommand.
 
 Copyright   : (c) Henry J. Wylde, 2015
 License     : BSD3
 Maintainer  : public@hjwylde.com
+
+Options and handler for the print subcommand.
 -}
 
 module Qux.Commands.Print (
@@ -29,6 +32,7 @@ import Text.PrettyPrint
 import Text.PrettyPrint.HughesPJClass
 
 
+-- | Print options.
 data Options = Options {
     optLineLength       :: Int,
     optMode             :: Mode,
@@ -38,8 +42,10 @@ data Options = Options {
     deriving (Eq, Show)
 
 
+-- | Pretty prints the file according to the options.
 handle :: Options -> IO ()
 handle options = runWorkerT $ Build.parse (argFilePath options) >>= print options
+
 
 print :: Options -> Program SourcePos -> WorkerT IO ()
 print options program = liftIO $ putStrLn (renderStyle style (pPrint program))
