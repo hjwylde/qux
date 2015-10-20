@@ -87,8 +87,6 @@ qux = Options <$> subparser (mconcat [
     ])
 
 
--- Subcommands
-
 build :: Parser Command
 build = fmap Build $ Build.Options
     <$> switch (mconcat [
