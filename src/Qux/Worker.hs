@@ -7,9 +7,11 @@ License     : BSD3
 Maintainer  : public@hjwylde.com
 -}
 
-{-# OPTIONS_HADDOCK hide, prune #-}
-
-module Qux.Worker where
+module Qux.Worker (
+    -- * WorkerT
+    WorkerT(..),
+    runWorkerT,
+) where
 
 import Control.Monad.Except
 

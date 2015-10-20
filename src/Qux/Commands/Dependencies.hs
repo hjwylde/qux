@@ -7,9 +7,13 @@ License     : BSD3
 Maintainer  : public@hjwylde.com
 -}
 
-{-# OPTIONS_HADDOCK hide, prune #-}
+module Qux.Commands.Dependencies (
+    -- * Options
+    Options(..),
 
-module Qux.Commands.Dependencies where
+    -- * Handle
+    handle,
+) where
 
 import Data.List.Extra (nubOrd, sort)
 

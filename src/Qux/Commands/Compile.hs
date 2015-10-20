@@ -7,9 +7,13 @@ License     : BSD3
 Maintainer  : public@hjwylde.com
 -}
 
-{-# OPTIONS_HADDOCK hide, prune #-}
+module Qux.Commands.Compile (
+    -- * Options
+    Options(..),
 
-module Qux.Commands.Compile where
+    -- * Handle
+    handle,
+) where
 
 import qualified Qux.Commands.Build as Build
 

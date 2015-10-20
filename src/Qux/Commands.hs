@@ -7,9 +7,13 @@ License     : BSD3
 Maintainer  : public@hjwylde.com
 -}
 
-{-# OPTIONS_HADDOCK hide, prune #-}
+module Qux.Commands (
+    -- * Options
+    Options(..), Command(..),
 
-module Qux.Commands where
+    -- * Optparse for Qux
+    qux, quxPrefs, quxInfo,
+) where
 
 import Data.List    (nub)
 import Data.Version (showVersion)
@@ -17,7 +21,7 @@ import Data.Version (showVersion)
 import qualified Language.Qux.Version as Qux
 
 import Options.Applicative
-import Options.Applicative.Types
+import Options.Applicative.Types (readerAsk)
 
 import Prelude hiding (print)
 
@@ -33,7 +37,25 @@ import System.FilePath
 import Text.PrettyPrint (Mode(..))
 
 
--- * Optparse for Qux
+data Options = Options { argCommand :: Command }
+    deriving (Eq, Show)
+
+data Command    = Build         Build.Options
+                | Check         Check.Options
+                | Compile       Compile.Options
+                | Dependencies  Dependencies.Options
+                | Print         Print.Options
+    deriving (Eq, Show)
+
+
+qux :: Parser Options
+qux = Options <$> subparser (mconcat [
+    command "build"         $ info (helper <*> build)           (fullDesc <> progDesc "Build FILES using composable options"),
+    command "check"         $ info (helper <*> check)           (fullDesc <> progDesc "Check FILES for correctness" <> header "Shortcut for `qux build --type-check'"),
+    command "compile"       $ info (helper <*> compile)         (fullDesc <> progDesc "Compile FILES into the LLVM IR" <> header "Shortcut for `qux build --compile --type-check'"),
+    command "dependencies"  $ info (helper <*> dependencies)    (fullDesc <> progDesc "Print out the dependency tree for FILES"),
+    command "print"         $ info (helper <*> print)           (fullDesc <> progDesc "Pretty print FILE")
+    ])
 
 quxPrefs :: ParserPrefs
 quxPrefs = prefs $ columns 100
@@ -55,32 +77,8 @@ quxInfo = info (infoOptions <*> qux) (fullDesc <> noIntersperse)
             help "Show the qux version this binary was compiled with"
             ]
 
--- * Command
 
-data Options = Options { argCommand :: Command }
-    deriving (Eq, Show)
-
-qux :: Parser Options
-qux = Options <$> subparser (mconcat [
-    command "build"         $ info (helper <*> build)           (fullDesc <> progDesc "Build FILES using composable options"),
-    command "check"         $ info (helper <*> check)           (fullDesc <> progDesc "Check FILES for correctness" <> header "Shortcut for `qux build --type-check'"),
-    command "compile"       $ info (helper <*> compile)         (fullDesc <> progDesc "Compile FILES into the LLVM IR" <> header "Shortcut for `qux build --compile --type-check'"),
-    command "dependencies"  $ info (helper <*> dependencies)    (fullDesc <> progDesc "Print out the dependency tree for FILES"),
-    command "print"         $ info (helper <*> print)           (fullDesc <> progDesc "Pretty print FILE")
-    ])
-
-
--- * Subcommands
-
-data Command    = Build         Build.Options
-                | Check         Check.Options
-                | Compile       Compile.Options
-                | Dependencies  Dependencies.Options
-                | Print         Print.Options
-    deriving (Eq, Show)
-
-
--- ** Build
+-- Subcommands
 
 build :: Parser Command
 build = fmap Build $ Build.Options
@@ -111,16 +109,10 @@ build = fmap Build $ Build.Options
         metavar "-- FILES..."
         ]))
 
-
--- ** Check
-
 check :: Parser Command
 check = Check . Check.Options <$> some (strArgument $ mconcat [
     metavar "FILES..."
     ])
-
-
--- ** Compile
 
 compile :: Parser Command
 compile = fmap Compile $ Compile.Options
@@ -143,17 +135,11 @@ compile = fmap Compile $ Compile.Options
         metavar "-- FILES..."
     ]))
 
-
--- ** Dependencies
-
 dependencies :: Parser Command
 dependencies = fmap Dependencies $ Dependencies.Options
     <$> fmap nub (some $ strArgument (mconcat [
         metavar "FILES..."
     ]))
-
-
--- ** Print
 
 print :: Parser Command
 print = fmap Print $ Print.Options
@@ -182,7 +168,7 @@ print = fmap Print $ Print.Options
             _           -> readerError $ "unrecognised mode `" ++ opt ++ "'"
 
 
--- ** Helpers
+-- Helper methods
 
 formatOption :: Mod OptionFields Build.Format -> Parser Build.Format
 formatOption = option $ readerAsk >>= \opt -> case opt of

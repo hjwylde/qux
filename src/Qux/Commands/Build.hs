@@ -7,9 +7,17 @@ License     : BSD3
 Maintainer  : public@hjwylde.com
 -}
 
-{-# OPTIONS_HADDOCK hide, prune #-}
+module Qux.Commands.Build (
+    -- * Options
+    Options(..), Format(..),
+    defaultOptions,
 
-module Qux.Commands.Build where
+    -- * Handle
+    handle,
+
+    -- * Utility
+    parse, parseAll,
+) where
 
 import Control.Monad.Except
 import Control.Monad.Extra
@@ -78,7 +86,7 @@ handle options = runWorkerT $ do
 
 build :: Options -> [Program SourcePos] -> [Program SourcePos] -> WorkerT IO ()
 build options programs libraries = do
-    programs'   <- mapM (resolve baseContext') programs
+    programs' <- mapM (resolve baseContext') programs
 
     when (optTypeCheck options) $ mapM_ (\program -> typeCheck (pContext program) program) programs'
     when (optCompile options)   $ mapM_ (\program -> compile options (pContext program) program) programs'
@@ -115,9 +123,6 @@ compile options context program
         baseName    = last module_
 
 
-parseAll :: [FilePath] -> WorkerT IO [Program SourcePos]
-parseAll = mapM parse
-
 parse :: FilePath -> WorkerT IO (Program SourcePos)
 parse filePath = do
     whenM (not <$> liftIO (doesFileExist filePath)) $ do
@@ -129,6 +134,9 @@ parse filePath = do
     case runExcept (P.parse program filePath contents) of
         Left error      -> yield (show error) >> throwError (ExitFailure 1)
         Right program   -> return program
+
+parseAll :: [FilePath] -> WorkerT IO [Program SourcePos]
+parseAll = mapM parse
 
 resolve :: Context -> Program SourcePos -> WorkerT IO (Program SourcePos)
 resolve baseContext program = do

@@ -7,8 +7,6 @@ License     : BSD3
 Maintainer  : public@hjwylde.com
 -}
 
-{-# OPTIONS_HADDOCK hide, prune #-}
-
 module Qux.Version (
     version
 ) where

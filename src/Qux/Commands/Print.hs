@@ -7,9 +7,13 @@ License     : BSD3
 Maintainer  : public@hjwylde.com
 -}
 
-{-# OPTIONS_HADDOCK hide, prune #-}
+module Qux.Commands.Print (
+    -- * Options
+    Options(..),
 
-module Qux.Commands.Print where
+    -- * Handle
+    handle,
+) where
 
 import Control.Monad.Except
 
