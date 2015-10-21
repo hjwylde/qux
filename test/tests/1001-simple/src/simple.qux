@@ -1,0 +1,7 @@
+module simple
+
+import foo
+
+main :: Int:
+    return foo
+

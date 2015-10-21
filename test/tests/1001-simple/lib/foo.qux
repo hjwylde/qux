@@ -1,0 +1,5 @@
+module foo
+
+foo :: Int:
+    return 0
+

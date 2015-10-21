@@ -38,14 +38,16 @@ compile :: FilePath -> IO ()
 compile dir = do
     createDirectoryIfMissing True binDir
 
-    compileQux  =<< findFilesByExtension [".qux"] srcDir
-    compileC    =<< findFilesByExtension [".c"] srcDir
+    findFilesByExtension [".qux"] libDir    >>= \files -> compileQux files []
+    findFilesByExtension [".c"] libDir      >>= compileC
+    findFilesByExtension [".qux"] srcDir    >>= \files -> compileQux files [libDir]
+    findFilesByExtension [".c"] srcDir      >>= compileC
     where
-        compileQux filePaths = do
+        compileQux filePaths libdirs = do
             Build.handle defaultOptions {
                 optCompile      = True,
                 optDestination  = binDir,
-                optLibdirs      = [libDir],
+                optLibdirs      = libdirs,
                 optTypeCheck    = True,
                 argFilePaths    = filePaths
                 }

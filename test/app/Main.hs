@@ -30,7 +30,7 @@ tests :: IO TestTree
 tests = do
     testsDir    <- getCurrentDirectory >>= \dir -> return $ dir </> "test" </> "tests"
     testDirs    <- getDirectoryContents testsDir
-    testTrees   <- mapM (test . combine testsDir) (filter (`notElem` [".", ".."]) testDirs)
+    testTrees   <- mapM (test . combine testsDir) (filter ((/= '.') . head) testDirs)
 
     return $ testGroup "Tests" testTrees
 
