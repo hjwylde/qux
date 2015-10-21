@@ -65,14 +65,19 @@ library
 test-suite qux-test
     type:           exitcode-stdio-1.0
     main-is:        Main.hs
-    hs-source-dirs: test/
+    hs-source-dirs: test/app/, test/src/
     ghc-options:    -threaded -Wall -Werror -fno-warn-name-shadowing
+    other-modules:
+        Qux.Test.Steps
 
     default-language: Haskell2010
     build-depends:
         base == 4.8.*,
+        directory == 1.2.*,
+        extra == 1.4.*,
+        filepath == 1.4.*,
+        process >= 1.2 && < 1.4,
         qux,
         tasty >= 0.10 && < 0.12,
-        tasty-hunit == 0.9.*,
-        tasty-quickcheck == 0.8.*
+        tasty-golden == 2.3.*
 

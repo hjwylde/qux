@@ -9,7 +9,9 @@ Maintainer  : public@hjwylde.com
 
 {-# OPTIONS_HADDOCK hide, prune #-}
 
-module Main where
+module Main (
+    main
+) where
 
 import Options.Applicative
 

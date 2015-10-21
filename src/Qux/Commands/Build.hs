@@ -86,7 +86,10 @@ instance Show Format where
 -- | Builds the files according to the options.
 handle :: Options -> IO ()
 handle options = runWorkerT $ do
-    libraryFilePaths <- liftIO $ concat <$> mapM listFilesRecursive (optLibdirs options)
+    libraryFilePaths <- liftIO $ concat <$> mapM
+        (\libdir ->
+            ifM (doesDirectoryExist libdir) (listFilesRecursive libdir) (return []))
+        (optLibdirs options)
 
     programs    <- parseAll $ argFilePaths options
     libraries   <- parseAll $ filter ((== ".qux") . takeExtension) libraryFilePaths
