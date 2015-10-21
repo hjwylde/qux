@@ -31,7 +31,7 @@ import              Qux.Worker
 
 -- | Dependencies options.
 data Options = Options {
-    argFilePaths :: [FilePath]
+    argFilePaths :: [FilePath] -- ^ The files to read the dependencies from.
     }
     deriving (Eq, Show)
 

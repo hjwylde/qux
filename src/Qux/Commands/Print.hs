@@ -34,10 +34,10 @@ import Text.PrettyPrint.HughesPJClass
 
 -- | Print options.
 data Options = Options {
-    optLineLength       :: Int,
-    optMode             :: Mode,
-    optRibbonsPerLine   :: Float,
-    argFilePath         :: FilePath
+    optLineLength       :: Int,     -- ^ The maximum line length.
+    optMode             :: Mode,    -- ^ The printing mode.
+    optRibbonsPerLine   :: Float,   -- ^ The number of ribbons per line.
+    argFilePath         :: FilePath -- ^ The file to pretty print.
     }
     deriving (Eq, Show)
 
