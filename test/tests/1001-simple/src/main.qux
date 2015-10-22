@@ -1,0 +1,7 @@
+module main
+
+import foo
+
+main :: Int:
+    return bar
+

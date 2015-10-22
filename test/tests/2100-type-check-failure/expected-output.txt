@@ -1,3 +1,0 @@
-"/Users/hjwylde/git/qux-lang/qux/test/tests/2100-type-check-failure/src/type_check_failure.qux" (line 4, column 12):
-unexpected type "Bool"
-expecting Int

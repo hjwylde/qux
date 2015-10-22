@@ -1,0 +1,2 @@
+"/Users/hjwylde/git/qux-lang/qux/test/tests/2101-undefined-function-call/src/main.qux" (line 4, column 12):
+call to undefined function "foo"

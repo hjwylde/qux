@@ -1,0 +1,8 @@
+module main
+
+main :: Int:
+    return foo 0
+
+foo :: Int i -> Int:
+    return i false
+

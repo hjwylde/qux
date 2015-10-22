@@ -1,4 +1,4 @@
-module type_check_failure
+module main
 
 main :: Int:
     return foo

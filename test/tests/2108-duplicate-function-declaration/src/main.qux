@@ -1,0 +1,11 @@
+module main
+
+main :: Int:
+    return foo
+
+foo :: Int:
+    return 1
+
+foo :: Int:
+    return 2
+

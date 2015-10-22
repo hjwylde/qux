@@ -1,0 +1,2 @@
+"/Users/hjwylde/git/qux-lang/qux/test/tests/2104-duplicate-import/src/main.qux" (line 4, column 1):
+duplicate import "foo"

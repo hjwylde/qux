@@ -1,0 +1,2 @@
+"/Users/hjwylde/git/qux-lang/qux/test/tests/2105-invalid-variable-access/src/main.qux" (line 7, column 12):
+arguments passed when accessing local variable "i"

@@ -42,8 +42,8 @@ clean dir = do
 build :: FilePath -> IO ()
 build dir = void $ runExceptT (runEffect $ for worker appendOutputFile)
     where
-        worker              = prepare dir >> compile dir >> link dir >> run dir
-        appendOutputFile    = liftIO . (appendFile $ actualOutputFilePath dir)
+        worker                  = prepare dir >> compile dir >> link dir >> run dir
+        appendOutputFile str    = liftIO $ appendFile (actualOutputFilePath dir) (str ++ "\n")
 
 prepare :: FilePath -> WorkerT IO ()
 prepare dir = liftIO $ writeFile (actualOutputFilePath dir) ""
