@@ -36,12 +36,12 @@ tests = do
 
 test :: String -> IO TestTree
 test dir = do
-    let name = takeDirectory dir
+    let name = takeFileName dir
 
     clean dir
 
     return $ goldenVsFile name
         (expectedOutputFilePath dir)
         (actualOutputFilePath dir)
-        (compile dir >> link dir >> run dir)
+        (build dir)
 

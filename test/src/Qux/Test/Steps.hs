@@ -10,16 +10,21 @@ Maintainer  : public@hjwylde.com
 {-# OPTIONS_HADDOCK hide, prune #-}
 
 module Qux.Test.Steps (
-    clean, compile, link, run,
+    clean, build,
 
     actualOutputFilePath, expectedOutputFilePath,
 ) where
 
+import Control.Monad.Except
 import Control.Monad.Extra
 
+import Pipes
+
 import Qux.Commands.Build as Build
+import Qux.Worker
 
 import System.Directory
+import System.Exit
 import System.FilePath
 import System.Process
 
@@ -34,9 +39,18 @@ clean dir = do
         binDir          = dir </> "bin"
         distDir         = dir </> "dist"
 
-compile :: FilePath -> IO ()
+build :: FilePath -> IO ()
+build dir = void $ runExceptT (runEffect $ for worker appendOutputFile)
+    where
+        worker              = prepare dir >> compile dir >> link dir >> run dir
+        appendOutputFile    = liftIO . (appendFile $ actualOutputFilePath dir)
+
+prepare :: FilePath -> WorkerT IO ()
+prepare dir = liftIO $ writeFile (actualOutputFilePath dir) ""
+
+compile :: FilePath -> WorkerT IO ()
 compile dir = do
-    createDirectoryIfMissing True binDir
+    liftIO $ createDirectoryIfMissing True binDir
 
     findFilesByExtension [".qux"] libDir    >>= \files -> compileQux files []
     findFilesByExtension [".c"] libDir      >>= compileC
@@ -51,32 +65,42 @@ compile dir = do
                 optTypeCheck    = True,
                 argFilePaths    = filePaths
                 }
-            mapM_ (\filePath -> (do
-                callCommand $ unwords ["llc -filetype obj", "-o", quote $ replaceDirectory filePath binDir -<.> "o", quote filePath]))
+            mapM_ (\filePath ->
+                runProcessForWorker "llc" ["-filetype", "obj", "-o", replaceDirectory filePath binDir -<.> "o", filePath] "")
                 =<< findFilesByExtension [".bc"] binDir
 
         compileC filePaths = mapM_
             (\filePath ->
-                callCommand $ unwords ["gcc -c", "-o", quote $ replaceDirectory filePath binDir -<.> "o", quote filePath])
+                runProcessForWorker "gcc" ["-c", "-o", replaceDirectory filePath binDir -<.> "o", filePath] "")
             filePaths
 
-        binDir = dir </> "bin"
-        libDir = dir </> "lib"
-        srcDir = dir </> "src"
+        binDir          = dir </> "bin"
+        libDir          = dir </> "lib"
+        srcDir          = dir </> "src"
 
-link :: FilePath -> IO ()
+link :: FilePath -> WorkerT IO ()
 link dir = do
     filePaths <- findFilesByExtension [".o"] binDir
 
-    createDirectoryIfMissing True distDir
+    liftIO $ createDirectoryIfMissing True distDir
 
-    callCommand $ unwords (["gcc", "-o", quote $ distDir </> "main"] ++ map quote filePaths)
+    runProcessForWorker "gcc" (["-o", distDir </> "main"] ++ filePaths) ""
     where
         binDir  = dir </> "bin"
         distDir = dir </> "dist"
 
-run :: FilePath -> IO ()
-run dir = callCommand $ unwords [dir </> "dist" </> "main", "&>", actualOutputFilePath dir]
+run :: FilePath -> WorkerT IO ()
+run dir = runProcessForWorker (dir </> "dist" </> "main") [] ""
+
+
+-- Helper methods
+
+runProcessForWorker :: FilePath -> [String] -> String -> WorkerT IO ()
+runProcessForWorker cmd args input = do
+    (exitCode, stdout, stderr) <- liftIO $ readProcessWithExitCode cmd args input
+
+    when (not . null $ stdout ++ stderr)    $ yield (stdout ++ stderr)
+    when (exitCode /= ExitSuccess)          $ throwError exitCode
 
 
 actualOutputFilePath :: FilePath -> FilePath
@@ -85,15 +109,11 @@ actualOutputFilePath dir = dir </> "output" <.> "txt"
 expectedOutputFilePath :: FilePath -> FilePath
 expectedOutputFilePath dir = dir </> "expected-output" <.> "txt"
 
-findFilesByExtension :: [String] -> FilePath -> IO [FilePath]
-findFilesByExtension exts dir = do
+findFilesByExtension :: [String] -> FilePath -> WorkerT IO [FilePath]
+findFilesByExtension exts dir = liftIO $ do
     filePaths <- ifM (doesDirectoryExist dir)
         (filter ((`elem` exts) . takeExtension) <$> getDirectoryContents dir)
         (return [])
 
     return $ map (combine dir) filePaths
-
--- TODO (hjw): replace any quote marks in str
-quote :: String -> String
-quote str = "\"" ++ str ++ "\""
 
