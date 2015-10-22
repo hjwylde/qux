@@ -42,7 +42,7 @@ import qualified    Language.Qux.Llvm.Compiler              as C
 import LLVM.General
 import LLVM.General.Context hiding (Context)
 
-import Pipes
+import Prelude hiding (log)
 
 import Qux.Worker
 
@@ -86,12 +86,14 @@ instance Show Format where
 -- | Builds the files according to the options.
 handle :: Options -> WorkerT IO ()
 handle options = do
-    libraryFilePaths <- liftIO $ concat <$> mapM
-        (\libdir ->
-            ifM (doesDirectoryExist libdir) (listFilesRecursive libdir) (return []))
-        (optLibdirs options)
+    libraryFilePaths <- concat <$> forM (optLibdirs options) (\libdir -> do
+        ifM (liftIO $ doesDirectoryExist libdir)
+            (liftIO $ listFilesRecursive libdir)
+            (log Warn (unwords ["Directory", libdir, "in libpath does not exist"]) >> return []))
 
+    log Debug $ "Parsing programs ..."
     programs    <- parseAll $ argFilePaths options
+    log Debug $ "Parsing libraries ..."
     libraries   <- parseAll $ filter ((== ".qux") . takeExtension) libraryFilePaths
 
     build options programs libraries
@@ -111,8 +113,8 @@ typeCheck :: Context -> Program SourcePos -> WorkerT IO ()
 typeCheck context program = do
     let errors = execCheck (checkProgram program) context
 
-    when (not $ null errors) $ do
-        each $ intersperse "" (map show errors)
+    unless (null errors) $ do
+        report Error $ intersperse "" (map show errors)
         throwError $ ExitFailure 1
 
 compile :: Options -> Context -> Program SourcePos -> WorkerT IO ()
@@ -143,14 +145,14 @@ compile options context program
 --   Returns the program if successful or yields the error message(s).
 parse :: FilePath -> WorkerT IO (Program SourcePos)
 parse filePath = do
-    whenM (not <$> liftIO (doesFileExist filePath)) $ do
-        yield $ "Cannot find file " ++ filePath
+    unlessM (liftIO $ doesFileExist filePath) $ do
+        log Error $ "Cannot find file " ++ filePath
         throwError $ ExitFailure 1
 
     contents <- liftIO $ readFile filePath
 
     case runExcept (P.parse program filePath contents) of
-        Left error      -> yield (show error) >> throwError (ExitFailure 1)
+        Left error      -> log Error (show error) >> throwError (ExitFailure 1)
         Right program   -> return program
 
 -- | Parses the files.
@@ -161,13 +163,13 @@ parseAll = mapM parse
 resolve :: Context -> Program SourcePos -> WorkerT IO (Program SourcePos)
 resolve baseContext program = do
     let (program', errors') = NameResolver.runResolve (NameResolver.resolveProgram program) context
-    when (not $ null errors') $ do
-        each $ intersperse "" (map show errors')
+    unless (null errors') $ do
+        report Error $ intersperse "" (map show errors')
         throwError $ ExitFailure 1
 
     let (program'', errors'') = TypeResolver.runResolve (TypeResolver.resolveProgram program') context
-    when (not $ null errors'') $ do
-        each $ intersperse "" (map show errors'')
+    unless (null errors'') $ do
+        report Error $ intersperse "" (map show errors'')
         throwError $ ExitFailure 1
 
     return program''

@@ -23,8 +23,6 @@ import Data.List.Extra (nubOrd, sort)
 import Language.Qux.Annotated.Parser
 import Language.Qux.Annotated.Syntax
 
-import Pipes
-
 import qualified    Qux.Commands.Build as Build
 import              Qux.Worker
 
@@ -42,7 +40,7 @@ handle options = Build.parseAll (argFilePaths options) >>= dependencies
 
 
 dependencies :: [Program SourcePos] -> WorkerT IO ()
-dependencies programs = each $ nubOrd (sort [simp (qualify id) |
+dependencies programs = report Info $ nubOrd (sort [simp (qualify id) |
     (Program _ _ decls) <- programs,
     (ImportDecl _ id)   <- decls
     ])

@@ -99,8 +99,8 @@ runProcessForWorker :: FilePath -> [String] -> String -> WorkerT IO ()
 runProcessForWorker cmd args input = do
     (exitCode, stdout, stderr) <- liftIO $ readProcessWithExitCode cmd args input
 
-    when (not . null $ stdout ++ stderr)    $ yield (stdout ++ stderr)
-    when (exitCode /= ExitSuccess)          $ throwError exitCode
+    unless (null $ stdout ++ stderr)    $ yield (stdout ++ stderr)
+    when (exitCode /= ExitSuccess)      $ throwError exitCode
 
 
 actualOutputFilePath :: FilePath -> FilePath

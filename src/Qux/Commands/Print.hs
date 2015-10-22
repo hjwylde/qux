@@ -23,8 +23,7 @@ import Control.Monad.Except
 import Language.Qux.Annotated.Parser (SourcePos)
 import Language.Qux.Annotated.Syntax
 
-import Pipes
-import Prelude hiding (print)
+import Prelude hiding (log, print)
 
 import qualified    Qux.Commands.Build as Build
 import              Qux.Worker
@@ -49,7 +48,7 @@ handle options = Build.parse (argFilePath options) >>= print options
 
 
 print :: Options -> Program SourcePos -> WorkerT IO ()
-print options program = yield $ renderStyle style (pPrint program)
+print options program = log Info $ renderStyle style (pPrint program)
     where
         style = Style {
             mode            = optMode options,
