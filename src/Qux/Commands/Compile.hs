@@ -18,7 +18,8 @@ module Qux.Commands.Compile (
     handle,
 ) where
 
-import qualified Qux.Commands.Build as Build
+import qualified    Qux.Commands.Build as Build
+import              Qux.Worker
 
 
 -- | Compile options.
@@ -33,7 +34,7 @@ data Options = Options {
 
 -- | Calls 'Build.handle', passing it the default options along with the compile options.
 --   This also sets the flag to type check the files.
-handle :: Options -> IO ()
+handle :: Options -> WorkerT IO ()
 handle options = Build.handle $ buildOptions options
 
 

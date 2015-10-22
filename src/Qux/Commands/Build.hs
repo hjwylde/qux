@@ -84,8 +84,8 @@ instance Show Format where
 
 
 -- | Builds the files according to the options.
-handle :: Options -> IO ()
-handle options = runWorkerT $ do
+handle :: Options -> WorkerT IO ()
+handle options = do
     libraryFilePaths <- liftIO $ concat <$> mapM
         (\libdir ->
             ifM (doesDirectoryExist libdir) (listFilesRecursive libdir) (return []))

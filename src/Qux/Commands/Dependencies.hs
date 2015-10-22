@@ -37,13 +37,13 @@ data Options = Options {
 
 
 -- | Prints out the file dependencies according to the options.
-handle :: Options -> IO ()
-handle options = runWorkerT $ Build.parseAll (argFilePaths options) >>= dependencies
+handle :: Options -> WorkerT IO ()
+handle options = Build.parseAll (argFilePaths options) >>= dependencies
 
 
 dependencies :: [Program SourcePos] -> WorkerT IO ()
 dependencies programs = each $ nubOrd (sort [simp (qualify id) |
     (Program _ _ decls) <- programs,
-    (ImportDecl _ id) <- decls
+    (ImportDecl _ id)   <- decls
     ])
 

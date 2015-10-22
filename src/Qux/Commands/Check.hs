@@ -18,7 +18,8 @@ module Qux.Commands.Check (
     handle,
 ) where
 
-import qualified Qux.Commands.Build as Build
+import qualified    Qux.Commands.Build as Build
+import              Qux.Worker
 
 
 -- | Check options.
@@ -29,7 +30,7 @@ data Options = Options {
 
 
 -- | Calls 'Build.handle', passing it the default options with a flag to type check the files.
-handle :: Options -> IO ()
+handle :: Options -> WorkerT IO ()
 handle options = Build.handle $ buildOptions options
 
 

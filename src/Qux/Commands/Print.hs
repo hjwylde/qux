@@ -23,6 +23,7 @@ import Control.Monad.Except
 import Language.Qux.Annotated.Parser (SourcePos)
 import Language.Qux.Annotated.Syntax
 
+import Pipes
 import Prelude hiding (print)
 
 import qualified    Qux.Commands.Build as Build
@@ -43,12 +44,12 @@ data Options = Options {
 
 
 -- | Pretty prints the file according to the options.
-handle :: Options -> IO ()
-handle options = runWorkerT $ Build.parse (argFilePath options) >>= print options
+handle :: Options -> WorkerT IO ()
+handle options = Build.parse (argFilePath options) >>= print options
 
 
 print :: Options -> Program SourcePos -> WorkerT IO ()
-print options program = liftIO $ putStrLn (renderStyle style (pPrint program))
+print options program = yield $ renderStyle style (pPrint program)
     where
         style = Style {
             mode            = optMode options,
