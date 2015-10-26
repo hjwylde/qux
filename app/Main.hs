@@ -31,11 +31,10 @@ main :: IO ()
 main = customExecParser quxPrefs quxInfo >>= handle
 
 handle :: Options -> IO ()
-handle options = runWorkerT $ do
-    log Debug $ show options
-
-    worker >-> quiet >-> verbose
+handle options = runWorkerT $ (header >> worker) >-> quiet >-> verbose
     where
+        header = log Debug $ show options
+
         worker = case argCommand options of
             Build           options -> Build.handle         options
             Check           options -> Check.handle         options
