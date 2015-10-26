@@ -1,2 +1,2 @@
-"/Users/hjwylde/git/qux-lang/qux/test/tests/2109-duplicate-function-declaration/src/main.qux" (line 8, column 10):
+"./src/main.qux" (line 8, column 10):
 duplicate function name "foo"

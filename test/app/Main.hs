@@ -43,5 +43,5 @@ test dir = do
     return $ goldenVsFile name
         (expectedOutputFilePath dir)
         (actualOutputFilePath dir)
-        (build dir)
+        (withCurrentDirectory dir $ build ".")
 
