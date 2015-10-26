@@ -76,11 +76,7 @@ defaultOptions = Options {
 
 -- | Output format for the compiled LLVM code.
 data Format = Assembly | Bitcode
-    deriving Eq
-
-instance Show Format where
-    show Assembly   = "assembly"
-    show Bitcode    = "bitcode"
+    deriving (Eq, Show)
 
 
 -- | Builds the files according to the options.

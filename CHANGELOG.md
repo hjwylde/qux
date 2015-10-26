@@ -6,6 +6,7 @@
 * Added in `dependencies` command that prints out a list of the file dependencies.
 * Added in `--libpath` option on the `compile` and `build` commands for referencing extra libraries
   during compilation
+* Added in `--verbose` and `--quiet` global options.
 
 #### v0.2.0.0
 

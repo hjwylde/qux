@@ -15,6 +15,8 @@ module Main (
 
 import Options.Applicative
 
+import Pipes
+
 import              Qux.Commands
 import qualified    Qux.Commands.Build          as Build
 import qualified    Qux.Commands.Check          as Check
@@ -28,10 +30,20 @@ main :: IO ()
 main = customExecParser quxPrefs quxInfo >>= handle
 
 handle :: Options -> IO ()
-handle options = runWorkerT $ case argCommand options of
-    Build           options -> Build.handle         options
-    Check           options -> Check.handle         options
-    Compile         options -> Compile.handle       options
-    Dependencies    options -> Dependencies.handle  options
-    Print           options -> Print.handle         options
+handle options = runWorkerT $ worker >-> quiet >-> verbose
+    where
+        worker = case argCommand options of
+            Build           options -> Build.handle         options
+            Check           options -> Check.handle         options
+            Compile         options -> Compile.handle       options
+            Dependencies    options -> Dependencies.handle  options
+            Print           options -> Print.handle         options
+
+        quiet
+            | optQuiet options  = requirePriority Error
+            | otherwise         = cat
+
+        verbose
+            | optVerbose options    = prependPriority >-> prependTimestamp
+            | otherwise             = requirePriority Info
 

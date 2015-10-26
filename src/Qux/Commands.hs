@@ -18,8 +18,8 @@ module Qux.Commands (
     quxPrefs, quxInfo, qux,
 ) where
 
-import Data.List    (nub)
-import Data.Version (showVersion)
+import Data.List.Extra  (lower, nub)
+import Data.Version     (showVersion)
 
 import qualified Language.Qux.Version as Qux
 
@@ -40,8 +40,12 @@ import System.FilePath
 import Text.PrettyPrint (Mode(..))
 
 
--- | A command.
-data Options = Options { argCommand :: Command }
+-- | Main options.
+data Options = Options {
+    optQuiet    :: Bool,    -- ^ Flag for quiet output.
+    optVerbose  :: Bool,    -- ^ Flag for verbose output.
+    argCommand  :: Command  -- ^ Command to run.
+    }
     deriving (Eq, Show)
 
 -- | A command and associated options.
@@ -60,7 +64,7 @@ quxPrefs = prefs $ columns 100
 
 -- | An optparse parser of a qux command.
 quxInfo :: ParserInfo Options
-quxInfo = info (infoOptions <*> qux) (fullDesc <> noIntersperse)
+quxInfo = info (infoOptions <*> qux) fullDesc
     where
         infoOptions = helper <*> version <*> numericVersion <*> quxVersion
         version = infoOption ("Version " ++ showVersion This.version) $ mconcat [
@@ -78,13 +82,22 @@ quxInfo = info (infoOptions <*> qux) (fullDesc <> noIntersperse)
 
 -- | A command subparser.
 qux :: Parser Options
-qux = Options <$> subparser (mconcat [
-    command "build"         $ info (helper <*> build)           (fullDesc <> progDesc "Build FILES using composable options"),
-    command "check"         $ info (helper <*> check)           (fullDesc <> progDesc "Check FILES for correctness" <> header "Shortcut for `qux build --type-check'"),
-    command "compile"       $ info (helper <*> compile)         (fullDesc <> progDesc "Compile FILES into the LLVM IR" <> header "Shortcut for `qux build --compile --type-check'"),
-    command "dependencies"  $ info (helper <*> dependencies)    (fullDesc <> progDesc "Print out the dependency tree for FILES"),
-    command "print"         $ info (helper <*> print)           (fullDesc <> progDesc "Pretty print FILE")
-    ])
+qux = Options
+    <$> switch (mconcat [
+        long "quiet", short 'q',
+        help "Be quiet (only show errors)"
+        ])
+    <*> switch (mconcat [
+        long "verbose", short 'v',
+        help "Be verbose (show all messages and timestamps)"
+        ])
+    <*> subparser (mconcat [
+        command "build"         $ info (helper <*> build)           (fullDesc <> progDesc "Build FILES using composable options"),
+        command "check"         $ info (helper <*> check)           (fullDesc <> progDesc "Check FILES for correctness" <> header "Shortcut for `qux build --type-check'"),
+        command "compile"       $ info (helper <*> compile)         (fullDesc <> progDesc "Compile FILES into the LLVM IR" <> header "Shortcut for `qux build --compile --type-check'"),
+        command "dependencies"  $ info (helper <*> dependencies)    (fullDesc <> progDesc "Print out the dependency tree for FILES"),
+        command "print"         $ info (helper <*> print)           (fullDesc <> progDesc "Pretty print FILE")
+        ])
 
 
 build :: Parser Command
@@ -100,7 +113,7 @@ build = fmap Build $ Build.Options
         ])
     <*> formatOption (mconcat [
         long "format", short 'f', metavar "FORMAT",
-        value Build.Bitcode, showDefault,
+        value Build.Bitcode, showDefaultWith $ \format -> lower (show format),
         help "Specify the LLVM output format as either `bitcode' or `assembly'"
         ])
     <*> fmap (\path -> if null path then [] else nub $ splitSearchPath path) (strOption $ mconcat [
@@ -131,7 +144,7 @@ compile = fmap Compile $ Compile.Options
         ])
     <*> formatOption (mconcat [
         long "format", short 'f', metavar "FORMAT",
-        value Build.Bitcode, showDefault,
+        value Build.Bitcode, showDefaultWith $ \format -> lower (show format),
         help "Specify the LLVM output format as either `bitcode' or `assembly'"
         ])
     <*> fmap (\path -> if null path then [] else nub $ splitSearchPath path) (strOption $ mconcat [

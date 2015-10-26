@@ -18,7 +18,9 @@ module Qux.Test.Steps (
 import Control.Monad.Except
 import Control.Monad.Extra
 
-import Pipes
+import              Pipes
+import qualified    Pipes.Prelude   as Pipes
+import              Prelude         hiding (log)
 
 import Qux.Commands.Build as Build
 import Qux.Worker
@@ -26,6 +28,7 @@ import Qux.Worker
 import System.Directory
 import System.Exit
 import System.FilePath
+import System.IO
 import System.Process
 
 
@@ -40,13 +43,11 @@ clean dir = do
         distDir         = dir </> "dist"
 
 build :: FilePath -> IO ()
-build dir = void $ runExceptT (runEffect $ for worker appendOutputFile)
+build dir = withFile (actualOutputFilePath dir) WriteMode $ \handle ->
+    void $ runExceptT (runEffect $ worker >-> requirePriority Info >-> extractMessage >-> Pipes.toHandle handle)
     where
-        worker                  = prepare dir >> compile dir >> link dir >> run dir
-        appendOutputFile str    = liftIO $ appendFile (actualOutputFilePath dir) (str ++ "\n")
-
-prepare :: FilePath -> WorkerT IO ()
-prepare dir = liftIO $ writeFile (actualOutputFilePath dir) ""
+        worker          = compile dir >> link dir >> run dir
+        extractMessage  = await >>= yield . snd
 
 compile :: FilePath -> WorkerT IO ()
 compile dir = do
@@ -99,8 +100,9 @@ runProcessForWorker :: FilePath -> [String] -> String -> WorkerT IO ()
 runProcessForWorker cmd args input = do
     (exitCode, stdout, stderr) <- liftIO $ readProcessWithExitCode cmd args input
 
-    unless (null $ stdout ++ stderr)    $ yield (stdout ++ stderr)
-    when (exitCode /= ExitSuccess)      $ throwError exitCode
+    unless (null stdout)            $ log Info stdout
+    unless (null stderr)            $ log Info stderr
+    when (exitCode /= ExitSuccess)  $ throwError exitCode
 
 
 actualOutputFilePath :: FilePath -> FilePath

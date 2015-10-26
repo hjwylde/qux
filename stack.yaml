@@ -2,7 +2,7 @@ packages:
 - '.'
 - location:
     git:    https://github.com/qux-lang/language-qux
-    commit: 72b2c8af3eba4c84314526d16ea7c2401656323c
+    commit: 63cd6298aa9d56fbd2c86743d7f7b84e600f6caf
 
 resolver:   lts-3.10
 extra-deps: ['language-qux-0.2.0.0', 'llvm-general-3.4.5.4', 'llvm-general-pure-3.4.5.4']

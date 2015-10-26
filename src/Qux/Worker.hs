@@ -15,15 +15,22 @@ module Qux.Worker (
     WorkerT,
     runWorkerT,
 
-    -- ** Logging to a worker
-    Priority(..),
+    -- ** Logging messages
+    Message, Priority(..),
     log, report,
+
+    -- ** Manipulating messages
+    requirePriority, prependPriority, prependTimestamp
 ) where
 
 import Control.Monad.Except
 
-import Pipes
-import Prelude hiding (log)
+import Data.List.Extra  (lower)
+import Data.Time        (getZonedTime)
+
+import              Pipes
+import qualified    Pipes.Prelude   as Pipes
+import              Prelude         hiding (log)
 
 import System.Exit
 import System.IO
@@ -31,7 +38,7 @@ import System.IO
 
 -- | Monad transformer that wraps a 'Producer' and an 'ExceptT'.
 --   This provides an easy way to yield messages to the console and exit fast if an error occurs.
-type WorkerT m = Producer (Priority, String) (ExceptT ExitCode m)
+type WorkerT m = Producer Message (ExceptT ExitCode m)
 
 -- | Runs the worker printing out all yielded strings to the standard output.
 runWorkerT :: MonadIO m => WorkerT m a -> m a
@@ -42,7 +49,10 @@ runWorkerT worker = runExceptT (runEffect $ for worker (liftIO . print)) >>=
         print (_, message)      = putStrLn message
 
 
--- | A message priority, in descending order of importance.
+-- | A string with a priority.
+type Message = (Priority, String)
+
+-- | A priority, in descending order of importance.
 data Priority   = Debug
                 | Info
                 | Warn
@@ -57,3 +67,30 @@ log priority message = yield (priority, message)
 report :: (Monad m, Foldable f) => Priority -> f String -> WorkerT m ()
 report priority messages = mapM_ (\message -> yield (priority, message)) messages
 
+
+-- | A filter that only allows messages through with at least the given priority.
+requirePriority :: Monad m => Priority -> Pipe Message Message m r
+requirePriority min = Pipes.filter $ \(priority, _) -> priority >= min
+
+-- | A filter that prepends the priority to the message.
+--   The priority is prepended with a colon and right-padding.
+prependPriority :: Monad m => Pipe Message Message m r
+prependPriority = Pipes.map $ \(priority, message) ->
+    let newMessage = unwords [
+            lower (show priority) ++ ":" ++ (replicate (length (show Error) - length (show priority)) ' '),
+            message
+            ]
+    in (priority, newMessage)
+
+-- | A filter that prepends the timestamp to the message.
+--   The timestamp is surrounded by brackets.
+prependTimestamp :: MonadIO m => Pipe Message Message m r
+prependTimestamp = do
+    zonedTime <- liftIO getZonedTime
+
+    Pipes.map $ \(priority, message) ->
+        let newMessage = unwords [
+                "[" ++ show zonedTime ++ "]",
+                message
+                ]
+        in (priority, newMessage)
