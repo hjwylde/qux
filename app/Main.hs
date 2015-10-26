@@ -16,6 +16,7 @@ module Main (
 import Options.Applicative
 
 import Pipes
+import Prelude hiding (log)
 
 import              Qux.Commands
 import qualified    Qux.Commands.Build          as Build
@@ -30,7 +31,10 @@ main :: IO ()
 main = customExecParser quxPrefs quxInfo >>= handle
 
 handle :: Options -> IO ()
-handle options = runWorkerT $ worker >-> quiet >-> verbose
+handle options = runWorkerT $ do
+    log Debug $ show options
+
+    worker >-> quiet >-> verbose
     where
         worker = case argCommand options of
             Build           options -> Build.handle         options

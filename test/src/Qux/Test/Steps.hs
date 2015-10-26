@@ -43,7 +43,7 @@ clean dir = do
         distDir         = dir </> "dist"
 
 build :: FilePath -> IO ()
-build dir = withFile (actualOutputFilePath dir) WriteMode $ \handle ->
+build dir = withBinaryFile (actualOutputFilePath dir) WriteMode $ \handle ->
     void $ runExceptT (runEffect $ worker >-> requirePriority Info >-> extractMessage >-> Pipes.toHandle handle)
     where
         worker          = compile dir >> link dir >> run dir

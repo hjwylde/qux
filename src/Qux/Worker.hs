@@ -25,7 +25,7 @@ module Qux.Worker (
 
 import Control.Monad.Except
 
-import Data.List.Extra  (lower)
+import Data.List.Extra  (upper)
 import Data.Time        (getZonedTime)
 
 import              Pipes
@@ -73,11 +73,11 @@ requirePriority :: Monad m => Priority -> Pipe Message Message m r
 requirePriority min = Pipes.filter $ \(priority, _) -> priority >= min
 
 -- | A filter that prepends the priority to the message.
---   The priority is prepended with a colon and right-padding.
+--   The priority is prepended with right-padding.
 prependPriority :: Monad m => Pipe Message Message m r
 prependPriority = Pipes.map $ \(priority, message) ->
     let newMessage = unwords [
-            lower (show priority) ++ ":" ++ (replicate (length (show Error) - length (show priority)) ' '),
+            upper (show priority) ++ (replicate (length (show Error) - length (show priority)) ' '),
             message
             ]
     in (priority, newMessage)
