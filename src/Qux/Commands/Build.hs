@@ -29,15 +29,15 @@ import Control.Monad.Extra
 import Control.Monad.Reader
 
 import qualified    Data.ByteString as BS
-import              Data.List       (intercalate, intersperse)
+import              Data.List.Extra (intercalate, intersperse, lower)
 
 import qualified    Language.Qux.Annotated.NameResolver     as NameResolver
 import              Language.Qux.Annotated.Parser           hiding (parse)
-import qualified    Language.Qux.Annotated.Parser           as P
+import qualified    Language.Qux.Annotated.Parser           as Parser
 import              Language.Qux.Annotated.Syntax
 import              Language.Qux.Annotated.TypeChecker
 import qualified    Language.Qux.Annotated.TypeResolver     as TypeResolver
-import qualified    Language.Qux.Llvm.Compiler              as C
+import qualified    Language.Qux.Llvm.Compiler              as Compiler
 
 import LLVM.General
 import LLVM.General.Context hiding (Context)
@@ -78,32 +78,56 @@ defaultOptions = Options {
 data Format = Assembly | Bitcode
     deriving (Eq, Show)
 
+ext :: Format -> String
+ext Assembly    = "ll"
+ext Bitcode     = "bc"
+
 
 -- | Builds the files according to the options.
 handle :: Options -> WorkerT IO ()
 handle options = do
+    log Debug $ "Parsing programs ..."
+    programs <- parseAll $ argFilePaths options
+
     libraryFilePaths <- concat <$> forM (optLibdirs options) (\libdir -> do
         ifM (liftIO $ doesDirectoryExist libdir)
             (liftIO $ listFilesRecursive libdir)
             (log Warn (unwords ["Directory", libdir, "in libpath does not exist"]) >> return []))
 
-    log Debug $ "Parsing programs ..."
-    programs    <- parseAll $ argFilePaths options
     log Debug $ "Parsing libraries ..."
-    libraries   <- parseAll $ filter ((== ".qux") . takeExtension) libraryFilePaths
+    libraries <- parseAll $ filter ((== ".qux") . takeExtension) libraryFilePaths
 
     build options programs libraries
 
 
 build :: Options -> [Program SourcePos] -> [Program SourcePos] -> WorkerT IO ()
 build options programs libraries = do
+    log Debug $ "Applying name and type resolvers ..."
     programs' <- mapM (resolve baseContext') programs
 
-    when (optTypeCheck options) $ mapM_ (\program -> typeCheck (pContext program) program) programs'
-    when (optCompile options)   $ mapM_ (\program -> compile options (pContext program) program) programs'
+    when (optTypeCheck options) $ do
+        log Debug $ "Applying type checker ..."
+        forM_ programs' $ \program -> typeCheck (context program) program
+
+    when (optCompile options)   $ do
+        log Debug $ "Compiling programs ..."
+
+        let count = length programs'
+        forM_ (zip [1..count] programs') $ \(index, program) -> do
+            let module_ = let (Program _ module_ _) = program in module_
+            let format  = optFormat options
+            let binDir  = optDestination options
+
+            log Debug $ unwords [
+                "[" ++ show index, "of", show count ++ "]",
+                "Compiling", simp $ qualify module_,
+                "(->", binDir </> intercalate [pathSeparator] (map simp module_) <.> ext format ++ ")"
+                ]
+
+            compile (context program) format binDir program
     where
         baseContext'    = baseContext $ map simp (programs ++ libraries)
-        pContext        = narrowContext baseContext' . simp
+        context         = narrowContext baseContext' . simp
 
 typeCheck :: Context -> Program SourcePos -> WorkerT IO ()
 typeCheck context program = do
@@ -113,26 +137,25 @@ typeCheck context program = do
         report Error $ intersperse "" (map show errors)
         throwError $ ExitFailure 1
 
-compile :: Options -> Context -> Program SourcePos -> WorkerT IO ()
-compile options context program
-    | optFormat options == Assembly = liftIO $ do
+compile :: Context -> Format -> FilePath -> Program SourcePos -> WorkerT IO ()
+compile context format binDir program
+    | format == Assembly    = liftIO $ do
         assembly <- withContext $ \context ->
-            runExceptT (withModuleFromAST context mod moduleLLVMAssembly) >>= either fail return
+            runExceptT (withModuleFromAST context llvmModule moduleLLVMAssembly) >>= either fail return
 
-        createDirectoryIfMissing True basePath
-        writeFile (basePath </> baseName <.> "ll") assembly
-    | optFormat options == Bitcode  = liftIO $ do
+        createDirectoryIfMissing True (takeDirectory filePath)
+        writeFile filePath assembly
+    | format == Bitcode     = liftIO $ do
         bitcode <- withContext $ \context ->
-            runExceptT (withModuleFromAST context mod moduleBitcode) >>= either fail return
+            runExceptT (withModuleFromAST context llvmModule moduleBitcode) >>= either fail return
 
-        createDirectoryIfMissing True basePath
-        BS.writeFile (basePath </> baseName <.> "bc") bitcode
-    | otherwise                     = error $ "internal error: format not implemented `" ++ show (optFormat options) ++ "'"
+        createDirectoryIfMissing True (takeDirectory filePath)
+        BS.writeFile filePath bitcode
+    | otherwise             = error $ "internal error: format not implemented `" ++ lower (show format) ++ "'"
     where
         module_     = let (Program _ module_ _) = program in map simp module_
-        mod         = runReader (C.compileProgram $ simp program) context
-        basePath    = intercalate [pathSeparator] (optDestination options:init module_)
-        baseName    = last module_
+        llvmModule  = runReader (Compiler.compileProgram $ simp program) context
+        filePath    = binDir </> intercalate [pathSeparator] module_ <.> ext format
 
 
 -- Helper methods
@@ -147,7 +170,7 @@ parse filePath = do
 
     contents <- liftIO $ readFile filePath
 
-    case runExcept (P.parse program filePath contents) of
+    case runExcept (Parser.parse program filePath contents) of
         Left error      -> log Error (show error) >> throwError (ExitFailure 1)
         Right program   -> return program
 

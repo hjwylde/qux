@@ -62,7 +62,8 @@ library
         optparse-applicative == 0.11.*,
         pipes == 4.1.*,
         pretty >= 1.1.2 && < 1.2,
-        time == 1.5.*
+        time == 1.5.*,
+        transformers == 0.4.*
 
 test-suite qux-test
     type:           exitcode-stdio-1.0

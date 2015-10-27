@@ -18,10 +18,14 @@ module Qux.Commands.Dependencies (
     handle,
 ) where
 
+import Control.Monad.IO.Class
+
 import Data.List.Extra (nubOrd, sort)
 
 import Language.Qux.Annotated.Parser
 import Language.Qux.Annotated.Syntax
+
+import Prelude hiding (log)
 
 import qualified    Qux.Commands.Build as Build
 import              Qux.Worker
@@ -36,11 +40,13 @@ data Options = Options {
 
 -- | Prints out the file dependencies according to the options.
 handle :: Options -> WorkerT IO ()
-handle options = Build.parseAll (argFilePaths options) >>= dependencies
+handle options = do
+    log Debug "Parsing ..."
+    Build.parseAll (argFilePaths options) >>= dependencies
 
 
 dependencies :: [Program SourcePos] -> WorkerT IO ()
-dependencies programs = report Info $ nubOrd (sort [simp (qualify id) |
+dependencies programs = liftIO $ mapM_ putStrLn (nubOrd $ sort [simp $ qualify id |
     (Program _ _ decls) <- programs,
     (ImportDecl _ id)   <- decls
     ])

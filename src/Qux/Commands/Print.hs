@@ -23,7 +23,7 @@ import Control.Monad.Except
 import Language.Qux.Annotated.Parser (SourcePos)
 import Language.Qux.Annotated.Syntax
 
-import Prelude hiding (print)
+import Prelude hiding (log, print)
 
 import qualified    Qux.Commands.Build as Build
 import              Qux.Worker
@@ -44,7 +44,9 @@ data Options = Options {
 
 -- | Pretty prints the file according to the options.
 handle :: Options -> WorkerT IO ()
-handle options = Build.parse (argFilePath options) >>= print options
+handle options = do
+    log Debug "Parsing ..."
+    Build.parse (argFilePath options) >>= print options
 
 
 print :: Options -> Program SourcePos -> WorkerT IO ()
