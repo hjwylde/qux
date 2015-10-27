@@ -13,6 +13,8 @@ module Main (
     main
 ) where
 
+import Control.Monad
+
 import Qux.Test.Steps
 
 import System.Directory
@@ -29,8 +31,10 @@ main = defaultMain =<< tests
 tests :: IO TestTree
 tests = do
     testsDir    <- getCurrentDirectory >>= \dir -> return $ dir </> "test" </> "tests"
-    testDirs    <- getDirectoryContents testsDir
-    testTrees   <- mapM (test . combine testsDir) (filter ((/= '.') . head) testDirs)
+    testDirs    <- filter ((/= '.') . head) <$> getDirectoryContents testsDir
+    testTrees   <- mapM test =<< filterM
+        (\testDir -> not <$> doesFileExist (testDir </> "pending"))
+        (map (combine testsDir) testDirs)
 
     return $ testGroup "Tests" testTrees
 
