@@ -57,7 +57,7 @@ library
         extra == 1.4.*,
         filepath == 1.4.*,
         language-qux == 0.2.*,
-        llvm-general == 3.4.*,
+        llvm-general == 3.5.*,
         mtl == 2.2.*,
         optparse-applicative == 0.11.*,
         pipes == 4.1.*,
