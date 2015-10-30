@@ -61,11 +61,11 @@ data Priority   = Debug
 
 -- | Logs the given message with the priority.
 log :: Monad m => Priority -> String -> WorkerT m ()
-log priority message = yield (priority, message)
+log priority message = report priority [message]
 
 -- | Logs all of the messages with the priority.
 report :: (Monad m, Foldable f) => Priority -> f String -> WorkerT m ()
-report priority messages = mapM_ (\message -> yield (priority, message)) messages
+report priority messages = each (map ((,) priority) (concatMap lines messages))
 
 
 -- | A filter that only allows messages through with at least the given priority.
