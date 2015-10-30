@@ -9,6 +9,7 @@
 * Added in `--libpath` option on the `compile` and `build` commands for referencing extra libraries
   during compilation
 * Added in `--verbose` and `--quiet` global options.
+* Updated to use LLVM 3.5. ([#4](https://github.com/qux-lang/issues/4))
 
 ### v0.2.0.0
 

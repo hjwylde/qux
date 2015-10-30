@@ -4,7 +4,10 @@ ghc-options:
 
 packages:
 - '.'
+- location:
+    git:    https://github.com/hjwylde/language-qux
+    commit: 95d0cc30331025287c8fcb78e1b84c709443275b
 extra-deps:
 - language-qux-0.2.0.0
-- llvm-general-3.4.5.4
-- llvm-general-pure-3.4.5.4
+- llvm-general-3.5.1.2
+- llvm-general-pure-3.5.1.0

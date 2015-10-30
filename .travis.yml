@@ -4,8 +4,16 @@ language: c
 
 addons:
     apt:
+        sources:
+        - llvm-toolchain-precise-3.5
+        - ubuntu-toolchain-r-test
         packages:
+        - clang
+        - g++-4.8
+        - gcc-4.8
+        - libedit-dev
         - libgmp-dev
+        - llvm-3.5-dev
 
 cache:
     directories:
