@@ -95,7 +95,7 @@ qux = Options
         command "build"         $ info (helper <*> build)           (fullDesc <> progDesc "Build FILES using composable options"),
         command "check"         $ info (helper <*> check)           (fullDesc <> progDesc "Check FILES for correctness" <> header "Shortcut for `qux build --type-check'"),
         command "compile"       $ info (helper <*> compile)         (fullDesc <> progDesc "Compile FILES into the LLVM IR" <> header "Shortcut for `qux build --compile --type-check'"),
-        command "dependencies"  $ info (helper <*> dependencies)    (fullDesc <> progDesc "Print out the dependency tree for FILES"),
+        command "dependencies"  $ info (helper <*> dependencies)    (fullDesc <> progDesc "Print out all module dependencies FILES"),
         command "print"         $ info (helper <*> print)           (fullDesc <> progDesc "Pretty print FILE")
         ])
 
