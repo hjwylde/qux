@@ -47,7 +47,7 @@ build dir = withBinaryFile (actualOutputFilePath dir) WriteMode $ \handle ->
     void $ runExceptT (runEffect $ worker >-> requirePriority Info >-> extractMessage >-> Pipes.toHandle handle)
     where
         worker          = compile dir >> link dir >> run dir
-        extractMessage  = await >>= yield . snd
+        extractMessage  = Pipes.map snd
 
 compile :: FilePath -> WorkerT IO ()
 compile dir = do
