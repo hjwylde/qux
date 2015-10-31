@@ -4,6 +4,11 @@ packages:
     git:    https://github.com/qux-lang/language-qux
     commit: 7197e3e91b1d99cd6b8f11934b2dbcc5d9807bb3
 
-resolver:   lts-3.10
-extra-deps: ['directory-1.2.3.0', 'language-qux-0.2.0.0', 'llvm-general-3.5.0.0', 'llvm-general-pure-3.5.0.0']
+resolver: lts-3.10
+
+extra-deps:
+- directory-1.2.3.0
+- language-qux-0.2.0.0
+- llvm-general-3.5.0.0
+- llvm-general-pure-3.5.0.0
 
