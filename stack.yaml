@@ -2,7 +2,7 @@ packages:
 - '.'
 - location:
     git:    https://github.com/qux-lang/language-qux
-    commit: 721b8e7df60189a084e0776f1facfc6eeaf5000f
+    commit: 7bdc0c89e4bde049eaab52d0a94d451972fa6f65
 
 resolver: lts-3.10
 
