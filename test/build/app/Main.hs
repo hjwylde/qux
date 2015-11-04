@@ -15,6 +15,7 @@ module Main (
 
 import Control.Monad
 
+import Qux.Test.Integration
 import Qux.Test.Steps
 
 import System.Directory
