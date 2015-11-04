@@ -30,7 +30,7 @@ main = defaultMain =<< tests
 
 tests :: IO TestTree
 tests = do
-    testsDir    <- getCurrentDirectory >>= \dir -> return $ dir </> "test" </> "tests"
+    testsDir    <- getCurrentDirectory >>= \dir -> return $ dir </> "test" </> "build" </> "tests"
     testDirs    <- filter ((/= '.') . head) <$> getDirectoryContents testsDir
     testTrees   <- mapM test =<< filterM
         (\testDir -> not <$> doesFileExist (testDir </> "pending"))

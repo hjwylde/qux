@@ -53,12 +53,12 @@ compile :: FilePath -> WorkerT IO ()
 compile dir = do
     liftIO $ createDirectoryIfMissing True binDir
 
-    findFilesByExtension [".qux"] libDir    >>= \files -> compileQux files []
+    findFilesByExtension [".qux"] libDir    >>= compileQux []
     findFilesByExtension [".c"] libDir      >>= compileC
-    findFilesByExtension [".qux"] srcDir    >>= \files -> compileQux files [libDir]
+    findFilesByExtension [".qux"] srcDir    >>= compileQux [libDir]
     findFilesByExtension [".c"] srcDir      >>= compileC
     where
-        compileQux filePaths libdirs = do
+        compileQux libdirs filePaths = do
             Build.handle defaultOptions {
                 optCompile      = True,
                 optDestination  = binDir,

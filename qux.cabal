@@ -65,10 +65,10 @@ library
         time == 1.5.*,
         transformers == 0.4.*
 
-test-suite qux-test
+test-suite qux-test-build
     type:           exitcode-stdio-1.0
     main-is:        Main.hs
-    hs-source-dirs: test/app/, test/src/
+    hs-source-dirs: test/build/app/, test/build/src/
     ghc-options:    -threaded -Wall -Werror -fno-warn-name-shadowing
     other-modules:
         Qux.Test.Steps
