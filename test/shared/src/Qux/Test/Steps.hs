@@ -11,8 +11,6 @@ Maintainer  : public@hjwylde.com
 
 module Qux.Test.Steps (
     clean, build,
-
-    actualOutputFilePath, expectedOutputFilePath,
 ) where
 
 import Control.Monad.Except
@@ -22,14 +20,13 @@ import              Pipes
 import qualified    Pipes.Prelude   as Pipes
 import              Prelude         hiding (log)
 
-import Qux.Commands.Build as Build
+import Qux.Commands.Build   as Build
+import Qux.Test.Integration
 import Qux.Worker
 
 import System.Directory
-import System.Exit
 import System.FilePath
 import System.IO
-import System.Process
 
 
 clean :: FilePath -> IO ()
@@ -49,16 +46,17 @@ build dir = withBinaryFile (actualOutputFilePath dir) WriteMode $ \handle ->
         worker          = compile dir >> link dir >> run dir
         extractMessage  = Pipes.map snd
 
+
 compile :: FilePath -> WorkerT IO ()
 compile dir = do
     liftIO $ createDirectoryIfMissing True binDir
 
-    findFilesByExtension [".qux"] libDir    >>= \files -> compileQux files []
+    findFilesByExtension [".qux"] libDir    >>= compileQux []
     findFilesByExtension [".c"] libDir      >>= compileC
-    findFilesByExtension [".qux"] srcDir    >>= \files -> compileQux files [libDir]
+    findFilesByExtension [".qux"] srcDir    >>= compileQux [libDir]
     findFilesByExtension [".c"] srcDir      >>= compileC
     where
-        compileQux filePaths libdirs = do
+        compileQux libdirs filePaths = do
             Build.handle defaultOptions {
                 optCompile      = True,
                 optDestination  = binDir,
@@ -67,12 +65,12 @@ compile dir = do
                 argFilePaths    = filePaths
                 }
             mapM_ (\filePath ->
-                runProcessForWorker "llc" ["-filetype", "obj", "-o", replaceDirectory filePath binDir -<.> "o", filePath] "")
+                runProcess "llc" ["-filetype", "obj", "-o", replaceDirectory filePath binDir -<.> "o", filePath] "")
                 =<< findFilesByExtension [".bc"] binDir
 
         compileC filePaths = mapM_
             (\filePath ->
-                runProcessForWorker "gcc" ["-c", "-o", replaceDirectory filePath binDir -<.> "o", filePath] "")
+                runProcess "gcc" ["-c", "-o", replaceDirectory filePath binDir -<.> "o", filePath] "")
             filePaths
 
         binDir          = dir </> "bin"
@@ -85,37 +83,11 @@ link dir = do
 
     liftIO $ createDirectoryIfMissing True distDir
 
-    runProcessForWorker "gcc" (["-o", distDir </> "main"] ++ filePaths) ""
+    runProcess "gcc" (["-o", distDir </> "main"] ++ filePaths) ""
     where
         binDir  = dir </> "bin"
         distDir = dir </> "dist"
 
 run :: FilePath -> WorkerT IO ()
-run dir = runProcessForWorker (dir </> "dist" </> "main") [] ""
-
-
--- Helper methods
-
-runProcessForWorker :: FilePath -> [String] -> String -> WorkerT IO ()
-runProcessForWorker cmd args input = do
-    (exitCode, stdout, stderr) <- liftIO $ readProcessWithExitCode cmd args input
-
-    unless (null stdout)            $ log Info stdout
-    unless (null stderr)            $ log Info stderr
-    when (exitCode /= ExitSuccess)  $ throwError exitCode
-
-
-actualOutputFilePath :: FilePath -> FilePath
-actualOutputFilePath dir = dir </> "output" <.> "txt"
-
-expectedOutputFilePath :: FilePath -> FilePath
-expectedOutputFilePath dir = dir </> "expected-output" <.> "txt"
-
-findFilesByExtension :: [String] -> FilePath -> WorkerT IO [FilePath]
-findFilesByExtension exts dir = liftIO $ do
-    filePaths <- ifM (doesDirectoryExist dir)
-        (filter ((`elem` exts) . takeExtension) <$> getDirectoryContents dir)
-        (return [])
-
-    return $ map (combine dir) filePaths
+run dir = runProcess (dir </> "dist" </> "main") [] ""
 
