@@ -12,10 +12,12 @@ Maintainer  : public@hjwylde.com
 module Qux.Test.Integration (
     runProcess,
 
+    withCurrentDirectory, findFilesByExtension,
+
     actualOutputFilePath, expectedOutputFilePath,
-    findFilesByExtension,
 ) where
 
+import Control.Exception
 import Control.Monad.Except
 import Control.Monad.Extra
 
@@ -38,11 +40,8 @@ runProcess cmd args input = do
     when (exitCode /= ExitSuccess)  $ throwError exitCode
 
 
-actualOutputFilePath :: FilePath -> FilePath
-actualOutputFilePath dir = dir </> "output" <.> "txt"
-
-expectedOutputFilePath :: FilePath -> FilePath
-expectedOutputFilePath dir = dir </> "expected-output" <.> "txt"
+withCurrentDirectory :: FilePath -> IO a -> IO a
+withCurrentDirectory dir action = bracket getCurrentDirectory setCurrentDirectory $ \_ -> setCurrentDirectory dir >> action
 
 findFilesByExtension :: [String] -> FilePath -> WorkerT IO [FilePath]
 findFilesByExtension exts dir = liftIO $ do
@@ -51,4 +50,11 @@ findFilesByExtension exts dir = liftIO $ do
         (return [])
 
     return $ map (combine dir) filePaths
+
+
+actualOutputFilePath :: FilePath -> FilePath
+actualOutputFilePath dir = dir </> "output" <.> "txt"
+
+expectedOutputFilePath :: FilePath -> FilePath
+expectedOutputFilePath dir = dir </> "expected-output" <.> "txt"
 
