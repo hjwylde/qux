@@ -64,18 +64,16 @@ compile dir = do
                 optTypeCheck    = True,
                 argFilePaths    = filePaths
                 }
+
             mapM_ (\filePath ->
                 runProcess "llc" ["-filetype", "obj", "-o", replaceDirectory filePath binDir -<.> "o", filePath] "")
                 =<< findFilesByExtension [".bc"] binDir
 
-        compileC filePaths = mapM_
-            (\filePath ->
-                runProcess "gcc" ["-c", "-o", replaceDirectory filePath binDir -<.> "o", filePath] "")
-            filePaths
+        compileC = mapM_ $ \filePath -> runProcess "gcc" ["-c", "-o", replaceDirectory filePath binDir -<.> "o", filePath] ""
 
-        binDir          = dir </> "bin"
-        libDir          = dir </> "lib"
-        srcDir          = dir </> "src"
+        binDir = dir </> "bin"
+        libDir = dir </> "lib"
+        srcDir = dir </> "src"
 
 link :: FilePath -> WorkerT IO ()
 link dir = do
