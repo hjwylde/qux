@@ -86,15 +86,15 @@ ext Bitcode     = "bc"
 -- | Builds the files according to the options.
 handle :: Options -> WorkerT IO ()
 handle options = do
-    log Debug $ "Parsing programs ..."
+    log Debug "Parsing programs ..."
     programs <- parseAll $ argFilePaths options
 
-    libraryFilePaths <- concat <$> forM (optLibdirs options) (\libdir -> do
+    libraryFilePaths <- concat <$> forM (optLibdirs options) (\libdir ->
         ifM (liftIO $ doesDirectoryExist libdir)
             (liftIO $ listFilesRecursive libdir)
             (log Warn (unwords ["Directory", libdir, "in libpath does not exist"]) >> return []))
 
-    log Debug $ "Parsing libraries ..."
+    log Debug "Parsing libraries ..."
     libraries <- parseAll $ filter ((== ".qux") . takeExtension) libraryFilePaths
 
     build options programs libraries
@@ -102,15 +102,15 @@ handle options = do
 
 build :: Options -> [Program SourcePos] -> [Program SourcePos] -> WorkerT IO ()
 build options programs libraries = do
-    log Debug $ "Applying name and type resolvers ..."
+    log Debug "Applying name and type resolvers ..."
     programs' <- mapM (resolve baseContext') programs
 
     when (optTypeCheck options) $ do
-        log Debug $ "Applying type checker ..."
+        log Debug "Applying type checker ..."
         forM_ programs' $ \program -> typeCheck (context program) program
 
     when (optCompile options)   $ do
-        log Debug $ "Compiling programs ..."
+        log Debug "Compiling programs ..."
 
         let count = length programs'
         forM_ (zip [1..count] programs') $ \(index, program) -> do
