@@ -21,10 +21,10 @@ before_install:
 - mkdir -p ~/.local/bin
 - export PATH=~/.local/bin:$PATH
 - travis_retry curl -L https://www.stackage.org/stack/linux-x86_64 | tar xz --wildcards --strip=1 -C ~/.local/bin '*/stack'
-- stack --resolver lts install hlint
 
 install:
 - travis_wait stack $ARGS --no-terminal --skip-ghc-check setup
+- stack --resolver lts install hlint
 
 script:
 - stack $ARGS --no-terminal --skip-ghc-check test
