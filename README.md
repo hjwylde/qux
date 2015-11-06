@@ -62,3 +62,13 @@ Prints out all the module dependencies (imported modules) of `FILES`.
 This isn't hugely useful on it's own, but once library packages are supported it will help in
     determining whether one is required or unused.
 
+**print**:
+
+Usage: `qux print [-l|--line-length LENGTH] [-m|--mode MODE] [-r|--ribbons-per-line RIBBONS] FILE`
+
+Pretty prints the file to standard output.
+The pretty printing uses the Haskell [pretty](https://hackage.haskell.org/package/pretty-1.1.3.2)
+    library based off _The Design of a Pretty Printing Library_ by John Hughes.
+If you're interested in how it works have a read of the
+    [paper](http://citeseerx.ist.psu.edu/viewdoc/summary?doi=10.1.1.38.8777).
+
