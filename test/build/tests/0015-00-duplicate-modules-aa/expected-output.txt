@@ -1,4 +1,4 @@
-"./src/dup.qux" (line 1, column 1):
+"./src/dup.qux" (line 1, column 8):
 duplicate module name "main"
-"./src/main.qux" (line 1, column 1):
+"./src/main.qux" (line 1, column 8):
 duplicate module name "main"

@@ -24,16 +24,16 @@ import Language.Qux.Annotated.Parser    (SourcePos)
 import Language.Qux.Syntax
 
 
-data BuildException = BuildException SourcePos String   -- ^ A generic build exception with a position and message.
-                    | DuplicateModule SourcePos [Id]    -- ^ Indicates duplicate module found.
+data BuildException = BuildException SourcePos String       -- ^ A generic build exception with a position and message.
+                    | DuplicateModuleName SourcePos [Id]    -- ^ Indicates duplicate module found.
     deriving (Eq, Typeable)
 
 instance CompilerException BuildException where
-    pos (BuildException p _)    = p
-    pos (DuplicateModule p _)   = p
+    pos (BuildException p _)        = p
+    pos (DuplicateModuleName p _)   = p
 
-    message (BuildException _ m) = m
-    message (DuplicateModule _ id) = "duplicate module name \"" ++ qualify id ++ "\""
+    message (BuildException _ m)        = m
+    message (DuplicateModuleName _ id)  = "duplicate module name \"" ++ qualify id ++ "\""
 
 instance Exception BuildException
 
