@@ -14,7 +14,8 @@ It features:
 * Pretty printing.
 * Dependency printing.
 
-For help on how to call `qux`, see `qux --help`.
+For quick help on how to call `qux`, see `qux --help`.
+Alternatively read the [online documentation](https://github.com/qux-lang/qux/blob/master/doc/index.md).
 
 ### Installing
 
