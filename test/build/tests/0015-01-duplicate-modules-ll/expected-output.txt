@@ -1,1 +1,4 @@
-error
+"./lib/dup.qux" (line 1, column 1):
+duplicate module name "foo"
+"./lib/foo.qux" (line 1, column 1):
+duplicate module name "foo"

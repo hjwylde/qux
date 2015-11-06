@@ -29,7 +29,9 @@ import Control.Monad.Extra
 import Control.Monad.Reader
 
 import qualified    Data.ByteString as BS
-import              Data.List.Extra (intercalate, intersperse, lower)
+import              Data.Function   (on)
+import              Data.List.Extra (groupBy, intercalate, intersperse, lower, sortOn)
+import              Data.Tuple      (swap)
 
 import qualified    Language.Qux.Annotated.NameResolver     as NameResolver
 import              Language.Qux.Annotated.Parser           hiding (parse)
@@ -44,6 +46,7 @@ import LLVM.General.Context hiding (Context)
 
 import Prelude hiding (log)
 
+import Qux.Exception
 import Qux.Worker
 
 import System.Directory.Extra
@@ -102,6 +105,14 @@ handle options = do
 
 build :: Options -> [Program SourcePos] -> [Program SourcePos] -> WorkerT IO ()
 build options programs libraries = do
+    log Debug "Applyng sanity checker ..."
+    let modules = sortOn fst [(map simp id, pos) | (Program pos id _) <- programs ++ libraries]
+    let duplicateModules = concat $ filter ((> 1) . length) (groupBy ((==) `on` fst) modules)
+
+    unless (null duplicateModules) $ do
+        report Error $ map (show . uncurry DuplicateModule . swap) duplicateModules
+        throwError $ ExitFailure 1
+
     log Debug "Applying name and type resolvers ..."
     programs' <- mapM (resolve baseContext') programs
 
