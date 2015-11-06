@@ -54,3 +54,11 @@ There are 5 commands available:
 `dependencies`    &mdash; prints out module dependencies.  
 `print`           &mdash; pretty prints Qux files.
 
+**dependencies**:
+
+Usage: `qux dependencies FILES...`
+
+Prints out all the module dependencies (imported modules) of `FILES`.
+This isn't hugely useful on it's own, but once library packages are supported it will help in
+    determining whether one is required or unused.
+
