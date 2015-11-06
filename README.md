@@ -54,6 +54,27 @@ There are 5 commands available:
 `dependencies`    &mdash; prints out module dependencies.  
 `print`           &mdash; pretty prints Qux files.
 
+**build**:
+
+Usage: `qux build [-c|--compile] [-d|--destination DIR] [-f|--format FORMAT] [-l|--libpath PATH] [--type-check] -- FILES...`
+
+Builds all of the given Qux files.
+By default this command does nothing except check that the files are parsable (this includes name
+    and type resolution).
+
+The `--libpath` option takes a path separated list of directories (e.g., `lib/:...`) to search for
+    libraries referenced by imports.
+This is used in name resolution to fully qualify all types and functions.
+
+Adding the `--type-check` option causes the command to check that types are used correctly.
+If an error is found, then it is reported to standard error and the build process stops.
+
+The `--compile` option adds compiling the Qux files into LLVM bitcode or assembly (specified by the
+    `--format` option).
+The organisation and naming of the input files does not matter, however the output files will be
+    written out to the destination directory in appropriate module folders.
+E.g., `qux build -d bin/ src/qux/lang/io.qux` will write to `bin/qux/lang/io.bc`.
+
 **dependencies**:
 
 Usage: `qux dependencies FILES...`
