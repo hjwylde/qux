@@ -43,10 +43,11 @@ library
         Qux.Commands.Compile,
         Qux.Commands.Dependencies,
         Qux.Commands.Print,
-        Qux.Version,
         Qux.Worker
     other-modules:
-        Paths_qux
+        Paths_qux,
+        Qux.Exception,
+        Qux.Version
 
     default-language: Haskell2010
     build-depends:

@@ -1,0 +1,5 @@
+module foo
+
+baz :: Int:
+    return 0
+
