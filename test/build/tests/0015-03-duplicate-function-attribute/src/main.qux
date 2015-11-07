@@ -1,0 +1,7 @@
+module main
+
+main :: Int:
+    return foo
+
+external external foo :: Int
+
