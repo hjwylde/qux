@@ -1,0 +1,4 @@
+"./src/main.qux" (line 6, column 12):
+duplicate parameter name "a"
+"./src/main.qux" (line 6, column 21):
+duplicate parameter name "a"

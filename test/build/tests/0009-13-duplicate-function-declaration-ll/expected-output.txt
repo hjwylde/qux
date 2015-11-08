@@ -1,2 +1,4 @@
+"./src/main.qux" (line 6, column 10):
+duplicate function name "foo"
 "./src/main.qux" (line 8, column 1):
 duplicate function name "foo"

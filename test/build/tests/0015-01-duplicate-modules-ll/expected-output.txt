@@ -1,0 +1,4 @@
+"./lib/dup.qux" (line 1, column 8):
+duplicate module name "foo"
+"./lib/foo.qux" (line 1, column 8):
+duplicate module name "foo"
