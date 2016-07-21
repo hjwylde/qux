@@ -1,4 +1,3 @@
-
 {-|
 Module      : Qux.Version
 Description : Haskell constant of the binary version.
@@ -17,4 +16,3 @@ module Qux.Version (
 ) where
 
 import Paths_qux (version)
-

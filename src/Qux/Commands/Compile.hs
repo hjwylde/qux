@@ -1,4 +1,3 @@
-
 {-|
 Module      : Qux.Commands.Compile
 Description : Options and handler for the compile subcommand.
@@ -47,4 +46,3 @@ buildOptions options = Build.defaultOptions {
     Build.optTypeCheck      = True,
     Build.argFilePaths      = argFilePaths options
     }
-

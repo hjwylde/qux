@@ -1,4 +1,3 @@
-
 {-|
 Module      : Qux.Commands.Build
 Description : Options and handler for the build subcommand.
@@ -204,4 +203,3 @@ resolve baseContext program = do
     return program''
     where
         context = narrowContext baseContext (simp program)
-

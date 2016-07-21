@@ -1,4 +1,3 @@
-
 {-|
 Module      : Main
 
@@ -49,4 +48,3 @@ test dir = do
         (expectedOutputFilePath dir)
         (actualOutputFilePath dir)
         (withCurrentDirectory dir $ build ".")
-

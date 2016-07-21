@@ -1,4 +1,3 @@
-
 {-|
 Module      : Qux.Commands.Print
 Description : Options and handler for the print subcommand.
@@ -57,4 +56,3 @@ print options program = liftIO $ putStrLn (renderStyle style (pPrint program))
             lineLength      = optLineLength options,
             ribbonsPerLine  = optRibbonsPerLine options
             }
-

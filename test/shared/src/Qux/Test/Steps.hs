@@ -1,4 +1,3 @@
-
 {-|
 Module      : Qux.Test.Steps
 
@@ -88,4 +87,3 @@ link dir = do
 
 run :: FilePath -> WorkerT IO ()
 run dir = runProcess (dir </> "dist" </> "main") [] ""
-

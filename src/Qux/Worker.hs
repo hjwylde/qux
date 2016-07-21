@@ -1,4 +1,3 @@
-
 {-|
 Module      : Qux.Worker
 Description : Monad transformer wrapping a 'Producer' and 'ExceptT'.

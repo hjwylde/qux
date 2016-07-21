@@ -1,8 +1,8 @@
 # qux
 
-[![Project Status: Active - The project has reached a stable, usable state and is being actively developed.](http://www.repostatus.org/badges/1.0.0/active.svg)](http://www.repostatus.org/#active)
-[![Build Status](https://travis-ci.org/qux-lang/qux.svg?branch=master)](https://travis-ci.org/qux-lang/qux)
-[![Release](https://img.shields.io/github/release/qux-lang/qux.svg)](https://github.com/qux-lang/qux/releases)
+[![Project Status: WIP - Initial development is in progress, but there has not yet been a stable, usable release suitable for the public.](http://www.repostatus.org/badges/latest/wip.svg)](http://www.repostatus.org/#wip)
+[![Build Status](https://travis-ci.org/hjwylde/qux.svg?branch=master)](https://travis-ci.org/hjwylde/qux)
+[![Release](https://img.shields.io/github/release/hjwylde/qux.svg)](https://github.com/hjwylde/qux/releases)
 
 Qux is an experimental language developed from the ground up with the aim of supporting extended
     static checks at compile time.
@@ -18,31 +18,30 @@ For quick help on how to call `qux`, see `qux --help`.
 
 ### Installing
 
-Installing `qux` is easiest done using either [stack](https://github.com/commercialhaskell/stack)
-    (recommended) or [Cabal](https://github.com/haskell/cabal).
+Installing qux is easiest done using either
+    [stack](https://github.com/commercialhaskell/stack) (recommended) or
+    [Cabal](https://github.com/haskell/cabal).
 
 NB: LLVM (v3.5) is required on the system for compiling Qux files.
 
-**Using stack**:
+**Using stack:**
 
 ```bash
 stack install qux
+export PATH=$PATH:~/.local/bin
 ```
 
-And make sure `~/.local/bin` is included on your `$PATH`.
-
-**Using Cabal**:
+**Using Cabal:**
 
 ```bash
 cabal-install qux
+export PATH=$PATH:~/.cabal/bin
 ```
 
-And make sure `~/.cabal/bin` is included on your `$PATH`.
-
-### Using
+### Usage
 
 The `qux` binary is designed to be modular and solely for manipulating Qux files.
-It is used in one part of the Qux build cycle&mdash;see the [meta](https://github.com/qux-lang/meta)
+It is used in one part of the Qux build cycle&mdash;see the [meta](https://github.com/hjwylde/meta)
     build tool for how it can be used in conjunction with other compilers (e.g., `llc`, `gcc`, and
     `clang`).
 
@@ -92,4 +91,3 @@ The pretty printing uses the Haskell [pretty](https://hackage.haskell.org/packag
     library based off _The Design of a Pretty Printing Library_ by John Hughes.
 If you're interested in how it works have a read of the
     [paper](http://citeseerx.ist.psu.edu/viewdoc/summary?doi=10.1.1.38.8777).
-

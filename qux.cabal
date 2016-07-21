@@ -3,9 +3,9 @@ version:        0.2.0.0
 
 author:         Henry J. Wylde
 maintainer:     public@hjwylde.com
-homepage:       https://github.com/qux-lang/qux
+homepage:       https://github.com/hjwylde/qux
 
-synopsis:       Command line binary for working with the Qux language
+synopsis:       A command line binary for working with the Qux language
 description:    Qux is an experimental language developed from the ground up with the aim of static
                 compile time verification. This package provides a binary for working with it
                 (compiling, type checking, pretty printing and dependency printing).
@@ -17,14 +17,18 @@ cabal-version:  >= 1.10
 category:       Qux
 build-type:     Simple
 
+extra-source-files:
+    CHANGELOG.md
+    README.md
+
 source-repository head
     type:       git
-    location:   git@github.com:qux-lang/qux
+    location:   git@github.com:hjwylde/qux
 
 executable qux
     main-is:        Main.hs
     hs-source-dirs: app/
-    ghc-options:    -Wall -Werror -fno-warn-name-shadowing
+    ghc-options:    -threaded -with-rtsopts=-N
 
     default-language: Haskell2010
     build-depends:
@@ -35,18 +39,17 @@ executable qux
 
 library
     hs-source-dirs: src/
-    ghc-options:    -Wall -Werror -fno-warn-name-shadowing
     exposed-modules:
-        Qux.Commands,
-        Qux.Commands.Build,
-        Qux.Commands.Check,
-        Qux.Commands.Compile,
-        Qux.Commands.Dependencies,
-        Qux.Commands.Print,
+        Qux.Commands
+        Qux.Commands.Build
+        Qux.Commands.Check
+        Qux.Commands.Compile
+        Qux.Commands.Dependencies
+        Qux.Commands.Print
         Qux.Worker
     other-modules:
-        Paths_qux,
-        Qux.Exception,
+        Paths_qux
+        Qux.Exception
         Qux.Version
 
     default-language: Haskell2010
@@ -70,7 +73,7 @@ test-suite qux-test-build
     type:           exitcode-stdio-1.0
     main-is:        Main.hs
     hs-source-dirs: test/build/app/, test/shared/src/
-    ghc-options:    -threaded -Wall -Werror -fno-warn-name-shadowing
+    ghc-options:    -threaded -with-rtsopts=-N
     other-modules:
         Qux.Test.Integration
         Qux.Test.Steps

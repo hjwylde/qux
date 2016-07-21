@@ -1,4 +1,3 @@
-
 {-|
 Module      : Qux.Commands.Dependencies
 Description : Options and handler for the dependencies subcommand.
@@ -50,4 +49,3 @@ dependencies programs = liftIO $ mapM_ putStrLn (nubOrd $ sort [simp $ qualify i
     (Program _ _ decls) <- programs,
     (ImportDecl _ id)   <- decls
     ])
-

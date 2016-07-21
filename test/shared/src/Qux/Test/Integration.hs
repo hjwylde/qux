@@ -1,4 +1,3 @@
-
 {-|
 Module      : Qux.Test.Integration
 
@@ -57,4 +56,3 @@ actualOutputFilePath dir = dir </> "output" <.> "txt"
 
 expectedOutputFilePath :: FilePath -> FilePath
 expectedOutputFilePath dir = dir </> "expected-output" <.> "txt"
-

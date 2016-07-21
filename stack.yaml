@@ -1,13 +1,10 @@
+resolver: lts-3.22
+ghc-options:
+    qux: -Werror -Wall -fno-warn-name-shadowing
+
 packages:
 - '.'
-- location:
-    git:    https://github.com/qux-lang/language-qux
-    commit: 812e3f011b4135517809def6e25c0e2bc940fe96
-
-resolver: lts-3.10
-
 extra-deps:
 - language-qux-0.2.0.0
 - llvm-general-3.4.5.4
 - llvm-general-pure-3.4.5.4
-

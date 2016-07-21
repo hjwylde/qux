@@ -1,4 +1,3 @@
-
 {-|
 Module      : Qux.Commands
 Description : Optparse utilities for the qux command.
@@ -196,4 +195,3 @@ formatOption = option $ readerAsk >>= \opt -> case opt of
     "assembly"  -> return Build.Assembly
     "bitcode"   -> return Build.Bitcode
     _           -> readerError $ "unrecognised format `" ++ opt ++ "'"
-

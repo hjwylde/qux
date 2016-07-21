@@ -1,4 +1,3 @@
-
 {-|
 Module      : Qux.Exception
 Description : Exceptions and utility functions.
@@ -39,4 +38,3 @@ instance Exception BuildException
 
 instance Show BuildException where
     show e = show (pos e) ++ ":\n" ++ message e
-

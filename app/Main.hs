@@ -1,4 +1,3 @@
-
 {-|
 Module      : Main
 
@@ -49,4 +48,3 @@ handle options = runWorkerT $ (header >> worker) >-> quiet >-> verbose
         verbose
             | optVerbose options    = prependPriority >-> prependTimestamp
             | otherwise             = requirePriority Info
-

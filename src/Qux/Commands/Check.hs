@@ -1,4 +1,3 @@
-
 {-|
 Module      : Qux.Commands.Check
 Description : Options and handler for the check subcommand.
@@ -39,4 +38,3 @@ buildOptions options = Build.defaultOptions {
     Build.optTypeCheck = True,
     Build.argFilePaths = argFilePaths options
     }
-
