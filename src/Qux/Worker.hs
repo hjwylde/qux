@@ -24,12 +24,12 @@ module Qux.Worker (
 
 import Control.Monad.Except
 
-import Data.List.Extra  (upper)
-import Data.Time        (getZonedTime)
+import Data.List.Extra (upper)
+import Data.Time       (getZonedTime)
 
-import              Pipes
-import qualified    Pipes.Prelude   as Pipes
-import              Prelude         hiding (log)
+import           Pipes
+import qualified Pipes.Prelude as Pipes
+import           Prelude       hiding (log)
 
 import System.Exit
 import System.IO

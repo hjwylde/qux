@@ -17,8 +17,8 @@ module Qux.Commands.Check (
     handle,
 ) where
 
-import qualified    Qux.Commands.Build as Build
-import              Qux.Worker
+import qualified Qux.Commands.Build as Build
+import           Qux.Worker
 
 
 -- | Check options.

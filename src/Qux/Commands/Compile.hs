@@ -17,16 +17,16 @@ module Qux.Commands.Compile (
     handle,
 ) where
 
-import qualified    Qux.Commands.Build as Build
-import              Qux.Worker
+import qualified Qux.Commands.Build as Build
+import           Qux.Worker
 
 
 -- | Compile options.
 data Options = Options {
-    optDestination  :: FilePath,        -- ^ The destination folder to write the compiled files.
-    optFormat       :: Build.Format,    -- ^ The output format.
-    optLibdirs      :: [FilePath],      -- ^ Directories to search for extra library files to reference (but not to compile).
-    argFilePaths    :: [FilePath]       -- ^ The files to compile.
+    optDestination :: FilePath,        -- ^ The destination folder to write the compiled files.
+    optFormat      :: Build.Format,    -- ^ The output format.
+    optLibdirs     :: [FilePath],      -- ^ Directories to search for extra library files to reference (but not to compile).
+    argFilePaths   :: [FilePath]       -- ^ The files to compile.
     }
     deriving (Eq, Show)
 

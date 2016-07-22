@@ -17,8 +17,8 @@ module Qux.Commands (
     quxPrefs, quxInfo, qux,
 ) where
 
-import Data.List.Extra  (lower, nub)
-import Data.Version     (showVersion)
+import Data.List.Extra (lower, nub)
+import Data.Version    (showVersion)
 
 import qualified Language.Qux.Version as Qux
 
@@ -27,23 +27,23 @@ import Options.Applicative.Types (readerAsk)
 
 import Prelude hiding (print)
 
-import qualified Qux.Commands.Build         as Build
-import qualified Qux.Commands.Check         as Check
-import qualified Qux.Commands.Compile       as Compile
-import qualified Qux.Commands.Dependencies  as Dependencies
-import qualified Qux.Commands.Print         as Print
-import qualified Qux.Version                as This
+import qualified Qux.Commands.Build        as Build
+import qualified Qux.Commands.Check        as Check
+import qualified Qux.Commands.Compile      as Compile
+import qualified Qux.Commands.Dependencies as Dependencies
+import qualified Qux.Commands.Print        as Print
+import qualified Qux.Version               as This
 
 import System.FilePath
 
-import Text.PrettyPrint (Mode(..))
+import Text.PrettyPrint (Mode (..))
 
 
 -- | Main options.
 data Options = Options {
-    optQuiet    :: Bool,    -- ^ Flag for quiet output.
-    optVerbose  :: Bool,    -- ^ Flag for verbose output.
-    argCommand  :: Command  -- ^ Command to run.
+    optQuiet   :: Bool,    -- ^ Flag for quiet output.
+    optVerbose :: Bool,    -- ^ Flag for verbose output.
+    argCommand :: Command  -- ^ Command to run.
     }
     deriving (Eq, Show)
 

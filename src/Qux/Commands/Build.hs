@@ -27,17 +27,17 @@ import Control.Monad.Except
 import Control.Monad.Extra
 import Control.Monad.Reader
 
-import qualified    Data.ByteString as BS
-import              Data.Function   (on)
-import              Data.List.Extra (groupBy, intercalate, intersperse, lower, sortOn)
+import qualified Data.ByteString as BS
+import           Data.Function   (on)
+import           Data.List.Extra (groupBy, intercalate, intersperse, lower, sortOn)
 
-import qualified    Language.Qux.Annotated.NameResolver     as NameResolver
-import              Language.Qux.Annotated.Parser           hiding (parse)
-import qualified    Language.Qux.Annotated.Parser           as Parser
-import              Language.Qux.Annotated.Syntax
-import              Language.Qux.Annotated.TypeChecker
-import qualified    Language.Qux.Annotated.TypeResolver     as TypeResolver
-import qualified    Language.Qux.Llvm.Compiler              as Compiler
+import qualified Language.Qux.Annotated.NameResolver as NameResolver
+import           Language.Qux.Annotated.Parser       hiding (parse)
+import qualified Language.Qux.Annotated.Parser       as Parser
+import           Language.Qux.Annotated.Syntax
+import           Language.Qux.Annotated.TypeChecker
+import qualified Language.Qux.Annotated.TypeResolver as TypeResolver
+import qualified Language.Qux.Llvm.Compiler          as Compiler
 
 import LLVM.General
 import LLVM.General.Context hiding (Context)
@@ -54,12 +54,12 @@ import System.FilePath
 
 -- | Build options.
 data Options = Options {
-    optCompile      :: Bool,        -- ^ Flag for compiling to LLVM.
-    optDestination  :: FilePath,    -- ^ The destination folder to write the compiled files.
-    optFormat       :: Format,      -- ^ The output format.
-    optLibdirs      :: [FilePath],  -- ^ Directories to search for extra library files to reference (but not to compile).
-    optTypeCheck    :: Bool,        -- ^ Flag for type checking the files.
-    argFilePaths    :: [FilePath]   -- ^ The files to compile.
+    optCompile     :: Bool,        -- ^ Flag for compiling to LLVM.
+    optDestination :: FilePath,    -- ^ The destination folder to write the compiled files.
+    optFormat      :: Format,      -- ^ The output format.
+    optLibdirs     :: [FilePath],  -- ^ Directories to search for extra library files to reference (but not to compile).
+    optTypeCheck   :: Bool,        -- ^ Flag for type checking the files.
+    argFilePaths   :: [FilePath]   -- ^ The files to compile.
     }
     deriving (Eq, Show)
 

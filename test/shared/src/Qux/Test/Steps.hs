@@ -15,9 +15,9 @@ module Qux.Test.Steps (
 import Control.Monad.Except
 import Control.Monad.Extra
 
-import              Pipes
-import qualified    Pipes.Prelude   as Pipes
-import              Prelude         hiding (log)
+import           Pipes
+import qualified Pipes.Prelude as Pipes
+import           Prelude       hiding (log)
 
 import Qux.Commands.Build   as Build
 import Qux.Test.Integration

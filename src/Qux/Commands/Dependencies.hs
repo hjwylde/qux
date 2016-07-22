@@ -26,8 +26,8 @@ import Language.Qux.Annotated.Syntax
 
 import Prelude hiding (log)
 
-import qualified    Qux.Commands.Build as Build
-import              Qux.Worker
+import qualified Qux.Commands.Build as Build
+import           Qux.Worker
 
 
 -- | Dependencies options.

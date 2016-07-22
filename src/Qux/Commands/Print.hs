@@ -24,8 +24,8 @@ import Language.Qux.Annotated.Syntax
 
 import Prelude hiding (log, print)
 
-import qualified    Qux.Commands.Build as Build
-import              Qux.Worker
+import qualified Qux.Commands.Build as Build
+import           Qux.Worker
 
 import Text.PrettyPrint
 import Text.PrettyPrint.HughesPJClass
@@ -33,10 +33,10 @@ import Text.PrettyPrint.HughesPJClass
 
 -- | Print options.
 data Options = Options {
-    optLineLength       :: Int,     -- ^ The maximum line length.
-    optMode             :: Mode,    -- ^ The printing mode.
-    optRibbonsPerLine   :: Float,   -- ^ The number of ribbons per line.
-    argFilePath         :: FilePath -- ^ The file to pretty print.
+    optLineLength     :: Int,     -- ^ The maximum line length.
+    optMode           :: Mode,    -- ^ The printing mode.
+    optRibbonsPerLine :: Float,   -- ^ The number of ribbons per line.
+    argFilePath       :: FilePath -- ^ The file to pretty print.
     }
     deriving (Eq, Show)
 
