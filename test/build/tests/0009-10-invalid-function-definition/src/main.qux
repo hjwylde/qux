@@ -4,4 +4,3 @@ main :: Int:
     return foo
 
 foo :: Int
-

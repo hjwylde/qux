@@ -29,7 +29,6 @@ import System.Exit
 import System.FilePath
 import System.Process   hiding (runProcess)
 
-
 runProcess :: FilePath -> [String] -> String -> WorkerT IO ()
 runProcess cmd args input = do
     (exitCode, stdout, stderr) <- liftIO $ readProcessWithExitCode cmd args input
@@ -37,7 +36,6 @@ runProcess cmd args input = do
     unless (null stdout)            $ log Info stdout
     unless (null stderr)            $ log Error stderr
     when (exitCode /= ExitSuccess)  $ throwError exitCode
-
 
 withCurrentDirectory :: FilePath -> IO a -> IO a
 withCurrentDirectory dir action = bracket getCurrentDirectory setCurrentDirectory $ \_ -> setCurrentDirectory dir >> action
@@ -49,7 +47,6 @@ findFilesByExtension exts dir = liftIO $ do
         (return [])
 
     return $ map (combine dir) filePaths
-
 
 actualOutputFilePath :: FilePath -> FilePath
 actualOutputFilePath dir = dir </> "output" <.> "txt"

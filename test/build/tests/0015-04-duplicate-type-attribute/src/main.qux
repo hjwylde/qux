@@ -4,4 +4,3 @@ external external type Foo
 
 main :: Int:
     return 0
-

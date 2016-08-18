@@ -22,7 +22,6 @@ import Language.Qux.Annotated.Exception
 import Language.Qux.Annotated.Parser    (SourcePos)
 import Language.Qux.Syntax
 
-
 data BuildException = BuildException SourcePos String       -- ^ A generic build exception with a position and message.
                     | DuplicateModuleName SourcePos [Id]    -- ^ Indicates duplicate module found.
     deriving (Eq, Typeable)

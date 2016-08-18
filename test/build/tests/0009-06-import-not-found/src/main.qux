@@ -4,4 +4,3 @@ import foo
 
 main :: Int:
     return 0
-

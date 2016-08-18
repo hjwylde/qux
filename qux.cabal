@@ -90,4 +90,3 @@ test-suite qux-test-build
         qux,
         tasty >= 0.10 && < 0.12,
         tasty-golden == 2.3.*
-

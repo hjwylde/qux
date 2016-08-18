@@ -29,20 +29,17 @@ import Prelude hiding (log)
 import qualified Qux.Commands.Build as Build
 import           Qux.Worker
 
-
 -- | Dependencies options.
 data Options = Options {
     argFilePaths :: [FilePath] -- ^ The files to read the dependencies from.
     }
     deriving (Eq, Show)
 
-
 -- | Prints out the file dependencies according to the options.
 handle :: Options -> WorkerT IO ()
 handle options = do
     log Debug "Parsing ..."
     Build.parseAll (argFilePaths options) >>= dependencies
-
 
 dependencies :: [Program SourcePos] -> WorkerT IO ()
 dependencies programs = liftIO $ mapM_ putStrLn (nubOrd $ sort [simp $ qualify id |

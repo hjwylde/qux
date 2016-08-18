@@ -20,18 +20,15 @@ module Qux.Commands.Check (
 import qualified Qux.Commands.Build as Build
 import           Qux.Worker
 
-
 -- | Check options.
 data Options = Options {
     argFilePaths :: [FilePath] -- ^ The files to type check.
     }
     deriving (Eq, Show)
 
-
 -- | Calls 'Build.handle', passing it the default options with a flag to type check the files.
 handle :: Options -> WorkerT IO ()
 handle options = Build.handle $ buildOptions options
-
 
 buildOptions :: Options -> Build.Options
 buildOptions options = Build.defaultOptions {

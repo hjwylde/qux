@@ -7,4 +7,3 @@ external foo :: Int
 
 foo :: Int:
     return 0
-

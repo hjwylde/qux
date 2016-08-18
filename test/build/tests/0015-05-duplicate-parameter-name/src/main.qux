@@ -5,4 +5,3 @@ main :: Int:
 
 foo :: Int a -> Int a -> Int:
     return 0
-

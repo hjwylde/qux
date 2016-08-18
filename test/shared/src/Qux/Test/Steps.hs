@@ -27,7 +27,6 @@ import System.Directory
 import System.FilePath
 import System.IO
 
-
 clean :: FilePath -> IO ()
 clean dir = do
     whenM (doesDirectoryExist binDir)       $ removeDirectoryRecursive binDir
@@ -44,7 +43,6 @@ build dir = withBinaryFile (actualOutputFilePath dir) WriteMode $ \handle ->
     where
         worker          = compile dir >> link dir >> run dir
         extractMessage  = Pipes.map snd
-
 
 compile :: FilePath -> WorkerT IO ()
 compile dir = do

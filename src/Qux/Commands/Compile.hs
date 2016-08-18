@@ -20,7 +20,6 @@ module Qux.Commands.Compile (
 import qualified Qux.Commands.Build as Build
 import           Qux.Worker
 
-
 -- | Compile options.
 data Options = Options {
     optDestination :: FilePath,        -- ^ The destination folder to write the compiled files.
@@ -30,12 +29,10 @@ data Options = Options {
     }
     deriving (Eq, Show)
 
-
 -- | Calls 'Build.handle', passing it the default options along with the compile options.
 --   This also sets the flag to type check the files.
 handle :: Options -> WorkerT IO ()
 handle options = Build.handle $ buildOptions options
-
 
 buildOptions :: Options -> Build.Options
 buildOptions options = Build.defaultOptions {

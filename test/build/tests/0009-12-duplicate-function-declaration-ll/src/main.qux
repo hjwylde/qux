@@ -6,4 +6,3 @@ main :: Int:
 external foo :: Int
 
 external foo :: Int
-

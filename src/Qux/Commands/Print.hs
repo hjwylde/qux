@@ -30,7 +30,6 @@ import           Qux.Worker
 import Text.PrettyPrint
 import Text.PrettyPrint.HughesPJClass
 
-
 -- | Print options.
 data Options = Options {
     optLineLength     :: Int,     -- ^ The maximum line length.
@@ -40,13 +39,11 @@ data Options = Options {
     }
     deriving (Eq, Show)
 
-
 -- | Pretty prints the file according to the options.
 handle :: Options -> WorkerT IO ()
 handle options = do
     log Debug "Parsing ..."
     Build.parse (argFilePath options) >>= print options
-
 
 print :: Options -> Program SourcePos -> WorkerT IO ()
 print options program = liftIO $ putStrLn (renderStyle style (pPrint program))

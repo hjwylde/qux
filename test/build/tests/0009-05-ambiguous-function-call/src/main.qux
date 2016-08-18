@@ -7,4 +7,3 @@ main :: Int:
 
 bar :: Int:
     return 1
-

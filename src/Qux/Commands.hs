@@ -38,7 +38,6 @@ import System.FilePath
 
 import Text.PrettyPrint (Mode (..))
 
-
 -- | Main options.
 data Options = Options {
     optQuiet   :: Bool,    -- ^ Flag for quiet output.
@@ -54,7 +53,6 @@ data Command    = Build         Build.Options
                 | Dependencies  Dependencies.Options
                 | Print         Print.Options
     deriving (Eq, Show)
-
 
 -- | The default preferences.
 --   Limits the help output to 100 columns.
@@ -97,7 +95,6 @@ qux = Options
         command "dependencies"  $ info (helper <*> dependencies)    (fullDesc <> progDesc "Print out the module dependencies of FILES"),
         command "print"         $ info (helper <*> print)           (fullDesc <> progDesc "Pretty print FILE")
         ])
-
 
 build :: Parser Command
 build = fmap Build $ Build.Options
@@ -186,9 +183,6 @@ print = fmap Print $ Print.Options
             "normal"    -> return PageMode
             "one-line"  -> return OneLineMode
             _           -> readerError $ "unrecognised mode `" ++ opt ++ "'"
-
-
--- Helper methods
 
 formatOption :: Mod OptionFields Build.Format -> Parser Build.Format
 formatOption = option $ readerAsk >>= \opt -> case opt of

@@ -5,4 +5,3 @@ main :: Int:
 
 external foo :: Int:
     return 0
-

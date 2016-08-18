@@ -51,7 +51,6 @@ import System.Directory.Extra
 import System.Exit
 import System.FilePath
 
-
 -- | Build options.
 data Options = Options {
     optCompile     :: Bool,        -- ^ Flag for compiling to LLVM.
@@ -74,7 +73,6 @@ defaultOptions = Options {
     argFilePaths    = []
     }
 
-
 -- | Output format for the compiled LLVM code.
 data Format = Assembly | Bitcode
     deriving (Eq, Show)
@@ -82,7 +80,6 @@ data Format = Assembly | Bitcode
 ext :: Format -> String
 ext Assembly    = "ll"
 ext Bitcode     = "bc"
-
 
 -- | Builds the files according to the options.
 handle :: Options -> WorkerT IO ()
@@ -99,7 +96,6 @@ handle options = do
     libraries <- parseAll $ filter ((== ".qux") . takeExtension) libraryFilePaths
 
     build options programs libraries
-
 
 build :: Options -> [Program SourcePos] -> [Program SourcePos] -> WorkerT IO ()
 build options programs libraries = do
@@ -165,7 +161,6 @@ compile context format binDir program
         module_     = let (Program _ module_ _) = program in map simp module_
         llvmModule  = runReader (Compiler.compileProgram $ simp program) context
         filePath    = binDir </> intercalate [pathSeparator] module_ <.> ext format
-
 
 -- Helper methods
 

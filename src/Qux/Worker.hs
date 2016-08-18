@@ -34,7 +34,6 @@ import           Prelude       hiding (log)
 import System.Exit
 import System.IO
 
-
 -- | Monad transformer that wraps a 'Producer' and an 'ExceptT'.
 --   This provides an easy way to yield messages to the console and exit fast if an error occurs.
 type WorkerT m = Producer Message (ExceptT ExitCode m)
@@ -46,7 +45,6 @@ runWorkerT worker = runExceptT (runEffect $ for worker (liftIO . print)) >>=
     where
         print (Error, message)  = hPutStrLn stderr message
         print (_, message)      = putStrLn message
-
 
 -- | A string with a priority.
 type Message = (Priority, String)
@@ -65,7 +63,6 @@ log priority message = report priority [message]
 -- | Logs all of the messages with the priority.
 report :: (Monad m, Foldable f) => Priority -> f String -> WorkerT m ()
 report priority messages = each (map ((,) priority) (concatMap lines messages))
-
 
 -- | A filter that only allows messages through with at least the given priority.
 requirePriority :: Monad m => Priority -> Pipe Message Message m r

@@ -23,10 +23,8 @@ import System.FilePath
 import Test.Tasty
 import Test.Tasty.Golden
 
-
 main :: IO ()
 main = defaultMain =<< tests
-
 
 tests :: IO TestTree
 tests = do
