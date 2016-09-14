@@ -1,5 +1,5 @@
 {-|
-Module      : Qux.Commands.Print
+Module      : Qux.Command.Print
 Description : Options and handler for the print subcommand.
 
 Copyright   : (c) Henry J. Wylde, 2015
@@ -9,7 +9,7 @@ Maintainer  : public@hjwylde.com
 Options and handler for the print subcommand.
 -}
 
-module Qux.Commands.Print (
+module Qux.Command.Print (
     -- * Options
     Options(..),
 
@@ -24,18 +24,18 @@ import Language.Qux.Annotated.Syntax
 
 import Prelude hiding (log, print)
 
-import qualified Qux.Commands.Build as Build
+import qualified Qux.Command.Build as Build
 import           Qux.Worker
 
 import Text.PrettyPrint
 import Text.PrettyPrint.HughesPJClass
 
 -- | Print options.
-data Options = Options {
-    optLineLength     :: Int,     -- ^ The maximum line length.
-    optMode           :: Mode,    -- ^ The printing mode.
-    optRibbonsPerLine :: Float,   -- ^ The number of ribbons per line.
-    argFilePath       :: FilePath -- ^ The file to pretty print.
+data Options = Options
+    { optLineLength     :: Int      -- ^ The maximum line length.
+    , optMode           :: Mode     -- ^ The printing mode.
+    , optRibbonsPerLine :: Float    -- ^ The number of ribbons per line.
+    , argFilePath       :: FilePath -- ^ The file to pretty print.
     }
     deriving (Eq, Show)
 
@@ -48,8 +48,8 @@ handle options = do
 print :: Options -> Program SourcePos -> WorkerT IO ()
 print options program = liftIO $ putStrLn (renderStyle style (pPrint program))
     where
-        style = Style {
-            mode            = optMode options,
-            lineLength      = optLineLength options,
-            ribbonsPerLine  = optRibbonsPerLine options
+        style = Style
+            { mode              = optMode options
+            , lineLength        = optLineLength options
+            , ribbonsPerLine    = optRibbonsPerLine options
             }

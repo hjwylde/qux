@@ -6,8 +6,6 @@ License     : BSD3
 Maintainer  : public@hjwylde.com
 -}
 
-{-# OPTIONS_HADDOCK hide, prune #-}
-
 module Qux.Test.Steps (
     clean, build,
 ) where
@@ -19,7 +17,7 @@ import           Pipes
 import qualified Pipes.Prelude as Pipes
 import           Prelude       hiding (log)
 
-import Qux.Commands.Build   as Build
+import Qux.Command.Build    as Build
 import Qux.Test.Integration
 import Qux.Worker
 

@@ -6,9 +6,8 @@ License     : BSD3
 Maintainer  : public@hjwylde.com
 -}
 
-{-# OPTIONS_HADDOCK hide, prune #-}
-
 module Main (
+    -- * Main
     main
 ) where
 
@@ -17,33 +16,36 @@ import Options.Applicative
 import Pipes
 import Prelude hiding (log)
 
-import           Qux.Commands
-import qualified Qux.Commands.Build        as Build
-import qualified Qux.Commands.Check        as Check
-import qualified Qux.Commands.Compile      as Compile
-import qualified Qux.Commands.Dependencies as Dependencies
-import qualified Qux.Commands.Print        as Print
+import qualified Qux.Command.Build        as Build
+import qualified Qux.Command.Check        as Check
+import qualified Qux.Command.Compile      as Compile
+import qualified Qux.Command.Dependencies as Dependencies
+import qualified Qux.Command.Print        as Print
+import           Qux.Options
 import           Qux.Worker
 
 main :: IO ()
 main = customExecParser quxPrefs quxInfo >>= handle
 
 handle :: Options -> IO ()
-handle options = runWorkerT $ (header >> worker) >-> quiet >-> verbose
+handle options = runWorkerT $ (logOptions options >> worker) >-> quietFilter options >-> verboseFilter options
     where
-        header = log Debug $ show options
-
         worker = case argCommand options of
-            Build           options -> Build.handle         options
-            Check           options -> Check.handle         options
-            Compile         options -> Compile.handle       options
-            Dependencies    options -> Dependencies.handle  options
-            Print           options -> Print.handle         options
+            Build options           -> Build.handle options
+            Check options           -> Check.handle options
+            Compile options         -> Compile.handle options
+            Dependencies options    -> Dependencies.handle options
+            Print options           -> Print.handle options
 
-        quiet
-            | optQuiet options  = requirePriority Error
-            | otherwise         = cat
+logOptions :: Options -> WorkerT IO ()
+logOptions = log Debug . show
 
-        verbose
-            | optVerbose options    = prependPriority >-> prependTimestamp
-            | otherwise             = requirePriority Info
+quietFilter :: Monad m => Options -> Pipe Message Message m r
+quietFilter options
+    | optQuiet options  = requirePriority Error
+    | otherwise         = cat
+
+verboseFilter :: MonadIO m => Options -> Pipe Message Message m r
+verboseFilter options
+    | optVerbose options    = prependPriority >-> prependTimestamp
+    | otherwise             = requirePriority Info

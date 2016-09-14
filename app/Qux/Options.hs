@@ -1,19 +1,19 @@
 {-|
-Module      : Qux.Commands
-Description : Optparse utilities for the qux command.
+Module      : Qux.Options
+Description : Optparse utilities.
 
 Copyright   : (c) Henry J. Wylde, 2015
 License     : BSD3
 Maintainer  : public@hjwylde.com
 
-Optparse utilities for the qux command.
+Optparse utilities.
 -}
 
-module Qux.Commands (
+module Qux.Options (
     -- * Options
     Options(..), Command(..),
 
-    -- * Optparse for Qux
+    -- * Optparse
     quxPrefs, quxInfo, qux,
 ) where
 
@@ -27,12 +27,12 @@ import Options.Applicative.Types (readerAsk)
 
 import Prelude hiding (print)
 
-import qualified Qux.Commands.Build        as Build
-import qualified Qux.Commands.Check        as Check
-import qualified Qux.Commands.Compile      as Compile
-import qualified Qux.Commands.Dependencies as Dependencies
-import qualified Qux.Commands.Print        as Print
-import qualified Qux.Version               as This
+import qualified Qux.Command.Build        as Build
+import qualified Qux.Command.Check        as Check
+import qualified Qux.Command.Compile      as Compile
+import qualified Qux.Command.Dependencies as Dependencies
+import qualified Qux.Command.Print        as Print
+import qualified Qux.Version              as This
 
 import System.FilePath
 
@@ -43,15 +43,15 @@ data Options = Options {
     optQuiet   :: Bool,    -- ^ Flag for quiet output.
     optVerbose :: Bool,    -- ^ Flag for verbose output.
     argCommand :: Command  -- ^ Command to run.
-    }
-    deriving (Eq, Show)
+    } deriving (Eq, Show)
 
 -- | A command and associated options.
-data Command    = Build         Build.Options
-                | Check         Check.Options
-                | Compile       Compile.Options
-                | Dependencies  Dependencies.Options
-                | Print         Print.Options
+data Command
+    = Build         Build.Options
+    | Check         Check.Options
+    | Compile       Compile.Options
+    | Dependencies  Dependencies.Options
+    | Print         Print.Options
     deriving (Eq, Show)
 
 -- | The default preferences.
@@ -63,21 +63,21 @@ quxPrefs = prefs $ columns 100
 quxInfo :: ParserInfo Options
 quxInfo = info (infoOptions <*> qux) fullDesc
     where
-        infoOptions = helper <*> version <*> numericVersion <*> quxVersion
-        version = infoOption ("Version " ++ showVersion This.version) $ mconcat [
+        infoOptions     = helper <*> version <*> numericVersion <*> quxVersion
+        version         = infoOption ("Version " ++ showVersion This.version) $ mconcat [
             long "version", short 'V', hidden,
             help "Show this binary's version"
             ]
-        numericVersion = infoOption (showVersion This.version) $ mconcat [
+        numericVersion  = infoOption (showVersion This.version) $ mconcat [
             long "numeric-version", hidden,
             help "Show this binary's version (without the prefix)"
             ]
-        quxVersion = infoOption ("Qux version " ++ showVersion Qux.version) $ mconcat [
+        quxVersion      = infoOption ("Qux version " ++ showVersion Qux.version) $ mconcat [
             long "qux-version", hidden,
             help "Show the qux version this binary was compiled with"
             ]
 
--- | A command subparser.
+-- | An options parser.
 qux :: Parser Options
 qux = Options
     <$> switch (mconcat [

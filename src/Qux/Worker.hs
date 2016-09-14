@@ -72,9 +72,9 @@ requirePriority min = Pipes.filter $ \(priority, _) -> priority >= min
 --   The priority is prepended with right-padding.
 prependPriority :: Monad m => Pipe Message Message m r
 prependPriority = Pipes.map $ \(priority, message) ->
-    let newMessage = unwords [
-            upper (show priority) ++ replicate (length (show Error) - length (show priority)) ' ',
-            message
+    let newMessage = unwords
+            [ upper (show priority) ++ replicate (length (show Error) - length (show priority)) ' '
+            , message
             ]
     in (priority, newMessage)
 
@@ -85,8 +85,8 @@ prependTimestamp = do
     zonedTime <- liftIO getZonedTime
 
     Pipes.map $ \(priority, message) ->
-        let newMessage = unwords [
-                "[" ++ show zonedTime ++ "]",
-                message
+        let newMessage = unwords
+                [ "[" ++ show zonedTime ++ "]"
+                , message
                 ]
         in (priority, newMessage)
