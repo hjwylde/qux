@@ -22,19 +22,13 @@ module Qux.Command.Build (
 
 import Control.Monad.Except
 import Control.Monad.Extra
-import Control.Monad.Reader
 
-import qualified Data.ByteString as BS
-import           Data.Function
-import           Data.List.Extra
+import Data.Function
+import Data.List.Extra
 
-import           Language.Qux.Annotated.Parser
-import           Language.Qux.Annotated.Syntax
-import           Language.Qux.Annotated.TypeChecker
-import qualified Language.Qux.Llvm.Compiler         as Compiler
-
-import LLVM.General
-import LLVM.General.Context hiding (Context)
+import Language.Qux.Annotated.Parser
+import Language.Qux.Annotated.Syntax
+import Language.Qux.Annotated.TypeChecker
 
 import Prelude hiding (log)
 
@@ -123,27 +117,9 @@ build options programs libraries = do
                 "(->", binDir </> intercalate [pathSeparator] (map simp module_) <.> ext format ++ ")"
                 ]
 
-            compile (context program) format binDir program
+            case format of
+                Assembly    -> BuildSteps.compileToLlvmAssembly (context program) binDir program
+                Bitcode     -> BuildSteps.compileToLlvmBitcode (context program) binDir program
     where
         baseContext'    = baseContext $ map simp (programs ++ libraries)
         context         = narrowContext baseContext' . simp
-
-compile :: Context -> Format -> FilePath -> Program SourcePos -> WorkerT IO ()
-compile context format binDir program
-    | format == Assembly    = liftIO $ do
-        assembly <- withContext $ \context ->
-            runExceptT (withModuleFromAST context llvmModule moduleLLVMAssembly) >>= either fail return
-
-        createDirectoryIfMissing True (takeDirectory filePath)
-        writeFile filePath assembly
-    | format == Bitcode     = liftIO $ do
-        bitcode <- withContext $ \context ->
-            runExceptT (withModuleFromAST context llvmModule moduleBitcode) >>= either fail return
-
-        createDirectoryIfMissing True (takeDirectory filePath)
-        BS.writeFile filePath bitcode
-    | otherwise             = error $ "internal error: format not implemented `" ++ lower (show format) ++ "'"
-    where
-        module_     = let (Program _ module_ _) = program in map simp module_
-        llvmModule  = runReader (Compiler.compileProgram $ simp program) context
-        filePath    = binDir </> intercalate [pathSeparator] module_ <.> ext format
