@@ -53,6 +53,7 @@ library
         Qux.Command.Compile
         Qux.Command.Dependencies
         Qux.Command.Print
+        Qux.Steps
         Qux.Worker
     other-modules:
         Qux.Exception
