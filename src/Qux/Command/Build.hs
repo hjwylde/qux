@@ -33,11 +33,9 @@ import Language.Qux.Annotated.TypeChecker
 import Prelude hiding (log)
 
 import qualified Qux.BuildSteps as BuildSteps
-import           Qux.Exception
 import           Qux.Worker
 
 import System.Directory.Extra
-import System.Exit
 import System.FilePath
 
 -- | Build options.
@@ -87,20 +85,15 @@ handle options = do
 
 build :: Options -> [Program SourcePos] -> [Program SourcePos] -> WorkerT IO ()
 build options programs libraries = do
-    log Debug "Applyng sanity checker ..."
-    let modules = sortOn snd [(ann $ head id, map simp id) | (Program _ id _) <- programs ++ libraries]
-    let duplicateModules = concat $ filter ((> 1) . length) (groupBy ((==) `on` snd) modules)
-
-    unless (null duplicateModules) $ do
-        report Error $ map (show . uncurry DuplicateModuleName) duplicateModules
-        throwError $ ExitFailure 1
+    log Debug "Applying sanity checker ..."
+    BuildSteps.sanityCheckAll programs libraries
 
     log Debug "Applying name and type resolvers ..."
-    programs' <- mapM (BuildSteps.resolve baseContext') programs
+    programs' <- BuildSteps.resolveAll baseContext' programs
 
     when (optTypeCheck options) $ do
         log Debug "Applying type checker ..."
-        forM_ programs' $ \program -> BuildSteps.typeCheck (context program) program
+        BuildSteps.typeCheckAll baseContext' programs'
 
     when (optCompile options) $ do
         log Debug "Compiling programs ..."

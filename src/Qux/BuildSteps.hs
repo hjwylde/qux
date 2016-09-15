@@ -13,11 +13,14 @@ module Qux.BuildSteps (
     -- * Parsing
     parse, parseAll,
 
+    -- * Sanity checking
+    sanityCheckAll,
+
     -- * Resolving
-    resolve,
+    resolve, resolveAll,
 
     -- * Type checking
-    typeCheck,
+    typeCheck, typeCheckAll,
 
     -- * Compiling
     compileToLlvmAssembly, compileToLlvmBitcode,
@@ -28,6 +31,7 @@ import Control.Monad.Extra
 import Control.Monad.Reader
 
 import qualified Data.ByteString as BS
+import           Data.Function
 import           Data.List.Extra
 
 import qualified Language.Qux.Annotated.NameResolver as NameResolver
@@ -43,6 +47,7 @@ import LLVM.General.Context hiding (Context)
 
 import Prelude hiding (log)
 
+import Qux.Exception
 import Qux.Worker
 
 import System.Directory.Extra
@@ -68,6 +73,21 @@ parse filePath = do
 parseAll :: [FilePath] -> WorkerT IO [Program SourcePos]
 parseAll = mapM parse
 
+-- | Sanity checks the programs and libraries.
+--   The checks comprise of looking for duplicate modules (both programs and libraries combined).
+--   Returns nothing if successful or yields the error message(s).
+sanityCheckAll :: [Program SourcePos] -> [Program SourcePos] -> WorkerT IO ()
+sanityCheckAll programs libraries = unless (null duplicateModules) $ do
+    report Error (map (show . uncurry DuplicateModuleName) duplicateModules)
+    throwError $ ExitFailure 1
+    where
+        modules             = sortOn snd
+            [ (ann $ head id, map simp id)
+            | (Program _ id _) <- programs ++ libraries
+            ]
+        duplicateModules    = concat $ filter ((> 1) . length) (groupBy ((==) `on` snd) modules)
+
+
 -- | Resolves the program with the given base context.
 --   Returns the program if successful or yields the error message(s).
 resolve :: Context -> Program SourcePos -> WorkerT IO (Program SourcePos)
@@ -86,6 +106,11 @@ resolve baseContext program = do
     where
         context = narrowContext baseContext (simp program)
 
+-- | Resolves all the programs with the given base context.
+--   Returns the programs if successful or yields the error message(s).
+resolveAll :: Context -> [Program SourcePos] -> WorkerT IO [Program SourcePos]
+resolveAll baseContext = mapM (resolve baseContext)
+
 -- | Type checks the program with the given narrow context.
 --   Returns nothing if successful or yields the error message(s).
 typeCheck :: Context -> Program SourcePos -> WorkerT IO ()
@@ -95,6 +120,14 @@ typeCheck context program = do
     unless (null errors) $ do
         report Error $ intersperse "" (map show errors)
         throwError $ ExitFailure 1
+
+-- | Type checks the programs with the given base context.
+--   Returns nothing if successful or yields the error message(s).
+typeCheckAll :: Context -> [Program SourcePos] -> WorkerT IO ()
+typeCheckAll baseContext programs = forM_ programs typeCheck'
+    where
+        typeCheck' program  = typeCheck (context program) program
+        context             = narrowContext baseContext . simp
 
 -- | Compiles the program with the given narrow context to LLVM assembly.
 --   Writes the compiled program to the given path.
