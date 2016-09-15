@@ -15,6 +15,9 @@ module Qux.BuildSteps (
 
     -- * Resolving
     resolve,
+
+    -- * Type checking
+    typeCheck,
 ) where
 
 import Control.Monad.Except
@@ -72,3 +75,13 @@ resolve baseContext program = do
     return program''
     where
         context = narrowContext baseContext (simp program)
+
+-- | Type checks the program with the given narrow context.
+--   Returns nothing if successful or yields the error message(s).
+typeCheck :: Context -> Program SourcePos -> WorkerT IO ()
+typeCheck context program = do
+    let errors = execCheck (checkProgram program) context
+
+    unless (null errors) $ do
+        report Error $ intersperse "" (map show errors)
+        throwError $ ExitFailure 1

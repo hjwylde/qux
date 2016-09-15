@@ -106,7 +106,7 @@ build options programs libraries = do
 
     when (optTypeCheck options) $ do
         log Debug "Applying type checker ..."
-        forM_ programs' $ \program -> typeCheck (context program) program
+        forM_ programs' $ \program -> BuildSteps.typeCheck (context program) program
 
     when (optCompile options) $ do
         log Debug "Compiling programs ..."
@@ -127,14 +127,6 @@ build options programs libraries = do
     where
         baseContext'    = baseContext $ map simp (programs ++ libraries)
         context         = narrowContext baseContext' . simp
-
-typeCheck :: Context -> Program SourcePos -> WorkerT IO ()
-typeCheck context program = do
-    let errors = execCheck (checkProgram program) context
-
-    unless (null errors) $ do
-        report Error $ intersperse "" (map show errors)
-        throwError $ ExitFailure 1
 
 compile :: Context -> Format -> FilePath -> Program SourcePos -> WorkerT IO ()
 compile context format binDir program
