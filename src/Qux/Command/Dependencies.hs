@@ -26,7 +26,7 @@ import Language.Qux.Annotated.Syntax
 
 import Prelude hiding (log)
 
-import qualified Qux.Command.Build as Build
+import qualified Qux.Steps  as BuildSteps
 import           Qux.Worker
 
 -- | Dependencies options.
@@ -38,7 +38,7 @@ data Options = Options
 handle :: Options -> WorkerT IO ()
 handle options = do
     log Debug "Parsing ..."
-    Build.parseAll (argFilePaths options) >>= dependencies
+    BuildSteps.parseAll (argFilePaths options) >>= dependencies
 
 dependencies :: [Program SourcePos] -> WorkerT IO ()
 dependencies programs = liftIO $ mapM_ putStrLn (nubOrd $ sort

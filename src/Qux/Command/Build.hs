@@ -18,9 +18,6 @@ module Qux.Command.Build (
 
     -- * Handle
     handle,
-
-    -- * Utility
-    parse, parseAll,
 ) where
 
 import Control.Monad.Except
@@ -33,7 +30,6 @@ import           Data.List.Extra (groupBy, intercalate, intersperse, lower, sort
 
 import qualified Language.Qux.Annotated.NameResolver as NameResolver
 import           Language.Qux.Annotated.Parser       hiding (parse)
-import qualified Language.Qux.Annotated.Parser       as Parser
 import           Language.Qux.Annotated.Syntax
 import           Language.Qux.Annotated.TypeChecker
 import qualified Language.Qux.Annotated.TypeResolver as TypeResolver
@@ -45,6 +41,7 @@ import LLVM.General.Context hiding (Context)
 import Prelude hiding (log)
 
 import Qux.Exception
+import Qux.Steps
 import Qux.Worker
 
 import System.Directory.Extra
@@ -160,27 +157,6 @@ compile context format binDir program
         module_     = let (Program _ module_ _) = program in map simp module_
         llvmModule  = runReader (Compiler.compileProgram $ simp program) context
         filePath    = binDir </> intercalate [pathSeparator] module_ <.> ext format
-
--- Helper methods
-
--- | Parses the file.
---   Returns the program if successful or yields the error message(s).
-parse :: FilePath -> WorkerT IO (Program SourcePos)
-parse filePath = do
-    unlessM (liftIO $ doesFileExist filePath) $ do
-        log Error $ "Cannot find file " ++ filePath
-        throwError $ ExitFailure 1
-
-    contents <- liftIO $ readFile filePath
-
-    case runExcept (Parser.parse program filePath contents) of
-        Left error      -> log Error (show error) >> throwError (ExitFailure 1)
-        Right program   -> return program
-
--- | Parses the files.
---   Returns the programs if successful or yields the error message(s).
-parseAll :: [FilePath] -> WorkerT IO [Program SourcePos]
-parseAll = mapM parse
 
 resolve :: Context -> Program SourcePos -> WorkerT IO (Program SourcePos)
 resolve baseContext program = do

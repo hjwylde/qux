@@ -24,7 +24,7 @@ import Language.Qux.Annotated.Syntax
 
 import Prelude hiding (log, print)
 
-import qualified Qux.Command.Build as Build
+import qualified Qux.Steps  as BuildSteps
 import           Qux.Worker
 
 import Text.PrettyPrint
@@ -43,7 +43,7 @@ data Options = Options
 handle :: Options -> WorkerT IO ()
 handle options = do
     log Debug "Parsing ..."
-    Build.parse (argFilePath options) >>= print options
+    BuildSteps.parse (argFilePath options) >>= print options
 
 print :: Options -> Program SourcePos -> WorkerT IO ()
 print options program = liftIO $ putStrLn (renderStyle style (pPrint program))
