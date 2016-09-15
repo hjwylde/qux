@@ -39,7 +39,8 @@ data Options = Options
     { optCompile     :: Bool        -- ^ Flag for compiling to LLVM.
     , optDestination :: FilePath    -- ^ The destination folder to write the compiled files.
     , optFormat      :: Format      -- ^ The output format.
-    , optLibdirs     :: [FilePath]  -- ^ Directories to search for extra library files to reference (but not to compile).
+    , optLibdirs     :: [FilePath]  -- ^ Directories to search for extra library files to reference
+                                    --   (but not to compile).
     , optTypeCheck   :: Bool        -- ^ Flag for type checking the files.
     , argFilePaths   :: [FilePath]  -- ^ The files to compile.
     } deriving (Eq, Show)

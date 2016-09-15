@@ -52,12 +52,12 @@ compile dir = do
     findFilesByExtension [".c"] srcDir      >>= compileC
     where
         compileQux libdirs filePaths = do
-            Build.handle defaultOptions {
-                optCompile      = True,
-                optDestination  = binDir,
-                optLibdirs      = libdirs,
-                optTypeCheck    = True,
-                argFilePaths    = filePaths
+            Build.handle defaultOptions
+                { optCompile        = True
+                , optDestination    = binDir
+                , optLibdirs        = libdirs
+                , optTypeCheck      = True
+                , argFilePaths      = filePaths
                 }
 
             mapM_ (\filePath ->

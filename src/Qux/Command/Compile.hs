@@ -24,12 +24,13 @@ import           Qux.Worker
 data Options = Options
     { optDestination :: FilePath        -- ^ The destination folder to write the compiled files.
     , optFormat      :: Build.Format    -- ^ The output format.
-    , optLibdirs     :: [FilePath]      -- ^ Directories to search for extra library files to reference (but not to compile).
+    , optLibdirs     :: [FilePath]      -- ^ Directories to search for extra library files to
+                                        --   reference (but not to compile).
     , argFilePaths   :: [FilePath]      -- ^ The files to compile.
     } deriving (Eq, Show)
 
--- | Calls 'Build.handle', passing it the default options along with the compile options.
---   This also sets the flag to type check the files.
+-- | Calls 'Build.handle', passing it the default options along with the compile options. This also
+--   sets the flag to type check the files.
 handle :: Options -> WorkerT IO ()
 handle options = Build.handle $ buildOptions options
 
