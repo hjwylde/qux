@@ -26,7 +26,7 @@ import Language.Qux.Annotated.Syntax
 
 import Prelude hiding (log)
 
-import qualified Qux.Steps  as BuildSteps
+import qualified Qux.BuildSteps as BuildSteps
 import           Qux.Worker
 
 -- | Dependencies options.

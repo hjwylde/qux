@@ -29,7 +29,7 @@ import           Data.Function   (on)
 import           Data.List.Extra (groupBy, intercalate, intersperse, lower, sortOn)
 
 import qualified Language.Qux.Annotated.NameResolver as NameResolver
-import           Language.Qux.Annotated.Parser       hiding (parse)
+import           Language.Qux.Annotated.Parser
 import           Language.Qux.Annotated.Syntax
 import           Language.Qux.Annotated.TypeChecker
 import qualified Language.Qux.Annotated.TypeResolver as TypeResolver
@@ -40,9 +40,9 @@ import LLVM.General.Context hiding (Context)
 
 import Prelude hiding (log)
 
-import Qux.Exception
-import Qux.Steps
-import Qux.Worker
+import qualified Qux.BuildSteps as BuildSteps
+import           Qux.Exception
+import           Qux.Worker
 
 import System.Directory.Extra
 import System.Exit
@@ -81,7 +81,7 @@ ext Bitcode     = "bc"
 handle :: Options -> WorkerT IO ()
 handle options = do
     log Debug "Parsing programs ..."
-    programs <- parseAll $ argFilePaths options
+    programs <- BuildSteps.parseAll $ argFilePaths options
 
     libraryFilePaths <- concat <$> forM (optLibdirs options) (\libdir ->
         ifM (liftIO $ doesDirectoryExist libdir)
@@ -89,7 +89,7 @@ handle options = do
             (log Warn (unwords ["Directory", libdir, "in libpath does not exist"]) >> return []))
 
     log Debug "Parsing libraries ..."
-    libraries <- parseAll $ filter ((== ".qux") . takeExtension) libraryFilePaths
+    libraries <- BuildSteps.parseAll $ filter ((== ".qux") . takeExtension) libraryFilePaths
 
     build options programs libraries
 

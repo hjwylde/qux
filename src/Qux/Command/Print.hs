@@ -24,7 +24,7 @@ import Language.Qux.Annotated.Syntax
 
 import Prelude hiding (log, print)
 
-import qualified Qux.Steps  as BuildSteps
+import qualified Qux.BuildSteps as BuildSteps
 import           Qux.Worker
 
 import Text.PrettyPrint

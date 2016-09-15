@@ -1,15 +1,16 @@
 {-|
-Module      : Qux.Steps
-Description : Build steps.
+Module      : Qux.BuildSteps
+Description : Build step utilities.
 
 Copyright   : (c) Henry J. Wylde, 2015
 License     : BSD3
 Maintainer  : public@hjwylde.com
 
-Build steps.
+Build step utilities.
 -}
 
-module Qux.Steps (
+module Qux.BuildSteps (
+    -- * Parsing
     parse, parseAll,
 ) where
 
