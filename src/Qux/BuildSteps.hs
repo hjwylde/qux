@@ -26,7 +26,7 @@ module Qux.BuildSteps (
     typeCheck, typeCheckAll,
 
     -- * Compiling
-    compileToLlvmAssembly, compileToLlvmBitcode,
+    compileToLlvmAssembly, compileAllToLlvmAssembly, compileToLlvmBitcode, compileAllToLlvmBitcode,
 ) where
 
 import Control.Monad.Except
@@ -155,6 +155,24 @@ compileToLlvmAssembly context binDir program = liftIO $ do
         llvmModule  = runReader (Compiler.compileProgram $ simp program) context
         filePath    = binDir </> intercalate [pathSeparator] module_ <.> "ll"
 
+-- | Compiles all the programs with the given base context to LLVM assembly. Writes the compiled
+--   programs to their appropriate path appended to the given bin directory.
+compileAllToLlvmAssembly :: Context -> FilePath -> [Program SourcePos] -> WorkerT IO ()
+compileAllToLlvmAssembly baseContext binDir programs = forM_ indexedPrograms $ \(index, program) -> do
+    let module_ = let (Program _ module_ _) = program in module_
+    let context = narrowContext baseContext (simp program)
+
+    log Debug $ unwords
+        [ "[" ++ show index, "of", show count ++ "]"
+        , "Compiling", simp $ qualify module_
+        , "(->", binDir </> intercalate [pathSeparator] (map simp module_) <.> "ll" ++ ")"
+        ]
+
+    compileToLlvmAssembly context binDir program
+    where
+        count           = length programs
+        indexedPrograms = zip [1..count] programs
+
 -- | Compiles the program with the given narrow context to LLVM bitcode. Writes the compiled program
 --   to the appropriate path appended to the given bin directory.
 compileToLlvmBitcode :: Context -> FilePath -> Program SourcePos -> WorkerT IO ()
@@ -168,3 +186,21 @@ compileToLlvmBitcode context binDir program = liftIO $ do
         module_     = let (Program _ module_ _) = program in map simp module_
         llvmModule  = runReader (Compiler.compileProgram $ simp program) context
         filePath    = binDir </> intercalate [pathSeparator] module_ <.> "bc"
+
+-- | Compiles all the programs with the given base context to LLVM bitcode. Writes the compiled
+--   programs to their appropriate path appended to the given bin directory.
+compileAllToLlvmBitcode :: Context -> FilePath -> [Program SourcePos] -> WorkerT IO ()
+compileAllToLlvmBitcode baseContext binDir programs = forM_ indexedPrograms $ \(index, program) -> do
+    let module_ = let (Program _ module_ _) = program in module_
+    let context = narrowContext baseContext (simp program)
+
+    log Debug $ unwords
+        [ "[" ++ show index, "of", show count ++ "]"
+        , "Compiling", simp $ qualify module_
+        , "(->", binDir </> intercalate [pathSeparator] (map simp module_) <.> "bc" ++ ")"
+        ]
+
+    compileToLlvmBitcode context binDir program
+    where
+        count           = length programs
+        indexedPrograms = zip [1..count] programs

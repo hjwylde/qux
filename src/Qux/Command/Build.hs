@@ -34,8 +34,6 @@ import Prelude hiding (log)
 import qualified Qux.BuildSteps as BuildSteps
 import           Qux.Worker
 
-import System.FilePath
-
 -- | Build options.
 data Options = Options
     { optCompile     :: Bool        -- ^ Flag for compiling to LLVM.
@@ -60,10 +58,6 @@ defaultOptions = Options
 -- | Output format for the compiled LLVM code.
 data Format = Assembly | Bitcode
     deriving (Eq, Show)
-
-ext :: Format -> String
-ext Assembly    = "ll"
-ext Bitcode     = "bc"
 
 -- | Builds the files according to the options.
 handle :: Options -> WorkerT IO ()
@@ -90,22 +84,11 @@ build options programs libraries = do
 
     when (optCompile options) $ do
         log Debug "Compiling programs ..."
-
-        let count = length programs'
-        forM_ (zip [1..count] programs') $ \(index, program) -> do
-            let module_ = let (Program _ module_ _) = program in module_
-            let format  = optFormat options
-            let binDir  = optDestination options
-
-            log Debug $ unwords [
-                "[" ++ show index, "of", show count ++ "]",
-                "Compiling", simp $ qualify module_,
-                "(->", binDir </> intercalate [pathSeparator] (map simp module_) <.> ext format ++ ")"
-                ]
-
-            case format of
-                Assembly    -> BuildSteps.compileToLlvmAssembly (context program) binDir program
-                Bitcode     -> BuildSteps.compileToLlvmBitcode (context program) binDir program
+        case format of
+            Assembly    -> BuildSteps.compileAllToLlvmAssembly baseContext' binDir programs
+            Bitcode     -> BuildSteps.compileAllToLlvmBitcode baseContext' binDir programs
     where
-        baseContext'    = baseContext $ map simp (programs ++ libraries)
-        context         = narrowContext baseContext' . simp
+        baseContext' = baseContext $ map simp (programs ++ libraries)
+
+        format = optFormat options
+        binDir = optDestination options
