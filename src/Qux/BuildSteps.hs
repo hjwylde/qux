@@ -12,14 +12,22 @@ Build step utilities.
 module Qux.BuildSteps (
     -- * Parsing
     parse, parseAll,
+
+    -- * Resolving
+    resolve,
 ) where
 
 import Control.Monad.Except
 import Control.Monad.Extra
 
-import           Language.Qux.Annotated.Parser hiding (parse)
-import qualified Language.Qux.Annotated.Parser as Parser
+import Data.List.Extra
+
+import qualified Language.Qux.Annotated.NameResolver as NameResolver
+import           Language.Qux.Annotated.Parser       hiding (parse)
+import qualified Language.Qux.Annotated.Parser       as Parser
 import           Language.Qux.Annotated.Syntax
+import           Language.Qux.Annotated.TypeChecker
+import qualified Language.Qux.Annotated.TypeResolver as TypeResolver
 
 import Prelude hiding (log)
 
@@ -46,3 +54,21 @@ parse filePath = do
 --   Returns the programs if successful or yields the error message(s).
 parseAll :: [FilePath] -> WorkerT IO [Program SourcePos]
 parseAll = mapM parse
+
+-- | Resolves the program with the given base context.
+--   Returns the program if successful or yields the error message(s).
+resolve :: Context -> Program SourcePos -> WorkerT IO (Program SourcePos)
+resolve baseContext program = do
+    let (program', errors') = NameResolver.runResolve (NameResolver.resolveProgram program) context
+    unless (null errors') $ do
+        report Error $ intersperse "" (map show errors')
+        throwError $ ExitFailure 1
+
+    let (program'', errors'') = TypeResolver.runResolve (TypeResolver.resolveProgram program') context
+    unless (null errors'') $ do
+        report Error $ intersperse "" (map show errors'')
+        throwError $ ExitFailure 1
+
+    return program''
+    where
+        context = narrowContext baseContext (simp program)

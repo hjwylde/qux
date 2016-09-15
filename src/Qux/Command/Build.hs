@@ -25,15 +25,13 @@ import Control.Monad.Extra
 import Control.Monad.Reader
 
 import qualified Data.ByteString as BS
-import           Data.Function   (on)
-import           Data.List.Extra (groupBy, intercalate, intersperse, lower, sortOn)
+import           Data.Function
+import           Data.List.Extra
 
-import qualified Language.Qux.Annotated.NameResolver as NameResolver
 import           Language.Qux.Annotated.Parser
 import           Language.Qux.Annotated.Syntax
 import           Language.Qux.Annotated.TypeChecker
-import qualified Language.Qux.Annotated.TypeResolver as TypeResolver
-import qualified Language.Qux.Llvm.Compiler          as Compiler
+import qualified Language.Qux.Llvm.Compiler         as Compiler
 
 import LLVM.General
 import LLVM.General.Context hiding (Context)
@@ -104,7 +102,7 @@ build options programs libraries = do
         throwError $ ExitFailure 1
 
     log Debug "Applying name and type resolvers ..."
-    programs' <- mapM (resolve baseContext') programs
+    programs' <- mapM (BuildSteps.resolve baseContext') programs
 
     when (optTypeCheck options) $ do
         log Debug "Applying type checker ..."
@@ -157,19 +155,3 @@ compile context format binDir program
         module_     = let (Program _ module_ _) = program in map simp module_
         llvmModule  = runReader (Compiler.compileProgram $ simp program) context
         filePath    = binDir </> intercalate [pathSeparator] module_ <.> ext format
-
-resolve :: Context -> Program SourcePos -> WorkerT IO (Program SourcePos)
-resolve baseContext program = do
-    let (program', errors') = NameResolver.runResolve (NameResolver.resolveProgram program) context
-    unless (null errors') $ do
-        report Error $ intersperse "" (map show errors')
-        throwError $ ExitFailure 1
-
-    let (program'', errors'') = TypeResolver.runResolve (TypeResolver.resolveProgram program') context
-    unless (null errors'') $ do
-        report Error $ intersperse "" (map show errors'')
-        throwError $ ExitFailure 1
-
-    return program''
-    where
-        context = narrowContext baseContext (simp program)
