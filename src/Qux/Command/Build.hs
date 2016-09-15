@@ -21,7 +21,6 @@ module Qux.Command.Build (
 ) where
 
 import Control.Monad.Except
-import Control.Monad.Extra
 
 import Data.Function
 import Data.List.Extra
@@ -35,7 +34,6 @@ import Prelude hiding (log)
 import qualified Qux.BuildSteps as BuildSteps
 import           Qux.Worker
 
-import System.Directory.Extra
 import System.FilePath
 
 -- | Build options.
@@ -73,13 +71,8 @@ handle options = do
     log Debug "Parsing programs ..."
     programs <- BuildSteps.parseAll $ argFilePaths options
 
-    libraryFilePaths <- concat <$> forM (optLibdirs options) (\libdir ->
-        ifM (liftIO $ doesDirectoryExist libdir)
-            (liftIO $ listFilesRecursive libdir)
-            (log Warn (unwords ["Directory", libdir, "in libpath does not exist"]) >> return []))
-
     log Debug "Parsing libraries ..."
-    libraries <- BuildSteps.parseAll $ filter ((== ".qux") . takeExtension) libraryFilePaths
+    libraries <- BuildSteps.parseAll =<< BuildSteps.expandLibdirs (optLibdirs options)
 
     build options programs libraries
 

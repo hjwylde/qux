@@ -10,6 +10,9 @@ Build step utilities.
 -}
 
 module Qux.BuildSteps (
+    -- Expanding library directories
+    expandLibdir, expandLibdirs,
+
     -- * Parsing
     parse, parseAll,
 
@@ -54,8 +57,19 @@ import System.Directory.Extra
 import System.Exit
 import System.FilePath
 
--- | Parses the file.
---   Returns the program if successful or yields the error message(s).
+expandLibdir :: FilePath -> WorkerT IO [FilePath]
+expandLibdir libdir = do
+    libraryFilePaths <- ifM (liftIO $ doesDirectoryExist libdir) listFilesRecursive' (logWarn >> return [])
+
+    return $ filter ((== ".qux") . takeExtension) libraryFilePaths
+    where
+        listFilesRecursive' = liftIO $ listFilesRecursive libdir
+        logWarn             = log Warn (unwords ["Directory", libdir, "in libpath does not exist"])
+
+expandLibdirs :: [FilePath] -> WorkerT IO [FilePath]
+expandLibdirs libdirs = concat <$> mapM expandLibdir libdirs
+
+-- | Parses the file. Returns the program if successful or yields the error message(s).
 parse :: FilePath -> WorkerT IO (Program SourcePos)
 parse filePath = do
     unlessM (liftIO $ doesFileExist filePath) $ do
@@ -68,14 +82,13 @@ parse filePath = do
         Left error      -> log Error (show error) >> throwError (ExitFailure 1)
         Right program   -> return program
 
--- | Parses the files.
---   Returns the programs if successful or yields the error message(s).
+-- | Parses the files. Returns the programs if successful or yields the error message(s).
 parseAll :: [FilePath] -> WorkerT IO [Program SourcePos]
 parseAll = mapM parse
 
--- | Sanity checks the programs and libraries.
---   The checks comprise of looking for duplicate modules (both programs and libraries combined).
---   Returns nothing if successful or yields the error message(s).
+-- | Sanity checks the programs and libraries. The checks comprise of looking for duplicate modules
+--   (both programs and libraries combined). Returns nothing if successful or yields the error
+--   message(s).
 sanityCheckAll :: [Program SourcePos] -> [Program SourcePos] -> WorkerT IO ()
 sanityCheckAll programs libraries = unless (null duplicateModules) $ do
     report Error (map (show . uncurry DuplicateModuleName) duplicateModules)
@@ -87,9 +100,8 @@ sanityCheckAll programs libraries = unless (null duplicateModules) $ do
             ]
         duplicateModules    = concat $ filter ((> 1) . length) (groupBy ((==) `on` snd) modules)
 
-
--- | Resolves the program with the given base context.
---   Returns the program if successful or yields the error message(s).
+-- | Resolves the program with the given base context. Returns the program if successful or yields
+--   the error message(s).
 resolve :: Context -> Program SourcePos -> WorkerT IO (Program SourcePos)
 resolve baseContext program = do
     let (program', errors') = NameResolver.runResolve (NameResolver.resolveProgram program) context
@@ -106,13 +118,13 @@ resolve baseContext program = do
     where
         context = narrowContext baseContext (simp program)
 
--- | Resolves all the programs with the given base context.
---   Returns the programs if successful or yields the error message(s).
+-- | Resolves all the programs with the given base context. Returns the programs if successful or
+--   yields the error message(s).
 resolveAll :: Context -> [Program SourcePos] -> WorkerT IO [Program SourcePos]
 resolveAll baseContext = mapM (resolve baseContext)
 
--- | Type checks the program with the given narrow context.
---   Returns nothing if successful or yields the error message(s).
+-- | Type checks the program with the given narrow context. Returns nothing if successful or yields
+--   the error message(s).
 typeCheck :: Context -> Program SourcePos -> WorkerT IO ()
 typeCheck context program = do
     let errors = execCheck (checkProgram program) context
@@ -121,16 +133,16 @@ typeCheck context program = do
         report Error $ intersperse "" (map show errors)
         throwError $ ExitFailure 1
 
--- | Type checks the programs with the given base context.
---   Returns nothing if successful or yields the error message(s).
+-- | Type checks the programs with the given base context. Returns nothing if successful or yields
+--   the error message(s).
 typeCheckAll :: Context -> [Program SourcePos] -> WorkerT IO ()
 typeCheckAll baseContext programs = forM_ programs typeCheck'
     where
         typeCheck' program  = typeCheck (context program) program
         context             = narrowContext baseContext . simp
 
--- | Compiles the program with the given narrow context to LLVM assembly.
---   Writes the compiled program to the given path.
+-- | Compiles the program with the given narrow context to LLVM assembly. Writes the compiled
+--   program to the appropriate path appended to the given bin directory.
 compileToLlvmAssembly :: Context -> FilePath -> Program SourcePos -> WorkerT IO ()
 compileToLlvmAssembly context binDir program = liftIO $ do
     assembly <- withContext $ \context ->
@@ -143,8 +155,8 @@ compileToLlvmAssembly context binDir program = liftIO $ do
         llvmModule  = runReader (Compiler.compileProgram $ simp program) context
         filePath    = binDir </> intercalate [pathSeparator] module_ <.> "ll"
 
--- | Compiles the program with the given narrow context to LLVM bitcode.
---   Writes the compiled program to the given path.
+-- | Compiles the program with the given narrow context to LLVM bitcode. Writes the compiled program
+--   to the appropriate path appended to the given bin directory.
 compileToLlvmBitcode :: Context -> FilePath -> Program SourcePos -> WorkerT IO ()
 compileToLlvmBitcode context binDir program = liftIO $ do
     bitcode <- withContext $ \context ->
