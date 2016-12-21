@@ -86,8 +86,8 @@ build options programs libraries = do
     when (optCompile options) $ do
         log Debug "Compiling programs ..."
         case format of
-            Assembly    -> BuildSteps.compileAllToLlvmAssembly baseContext' binDir programs
-            Bitcode     -> BuildSteps.compileAllToLlvmBitcode baseContext' binDir programs
+            Assembly    -> BuildSteps.compileAllToLlvmAssembly baseContext' binDir programs'
+            Bitcode     -> BuildSteps.compileAllToLlvmBitcode baseContext' binDir programs'
     where
         baseContext' = baseContext $ map simp (programs ++ libraries)
 
