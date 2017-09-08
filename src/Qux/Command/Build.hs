@@ -4,7 +4,7 @@ Description : Options and handler for the build subcommand.
 
 Copyright   : (c) Henry J. Wylde, 2015
 License     : BSD3
-Maintainer  : public@hjwylde.com
+Maintainer  : hjwylde@gmail.com
 
 Options and handler for the build subcommand.
 -}

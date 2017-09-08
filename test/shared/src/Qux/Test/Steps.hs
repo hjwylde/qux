@@ -3,7 +3,7 @@ Module      : Qux.Test.Steps
 
 Copyright   : (c) Henry J. Wylde, 2015
 License     : BSD3
-Maintainer  : public@hjwylde.com
+Maintainer  : hjwylde@gmail.com
 -}
 
 module Qux.Test.Steps (

@@ -2,7 +2,7 @@ name:           qux
 version:        0.2.0.0
 
 author:         Henry J. Wylde
-maintainer:     public@hjwylde.com
+maintainer:     hjwylde@gmail.com
 homepage:       https://github.com/hjwylde/qux
 
 synopsis:       A command line binary for working with the Qux language

@@ -4,7 +4,7 @@ Description : Monad transformer wrapping a 'Producer' and 'ExceptT'.
 
 Copyright   : (c) Henry J. Wylde, 2015
 License     : BSD3
-Maintainer  : public@hjwylde.com
+Maintainer  : hjwylde@gmail.com
 
 Monad transformer wrapping a 'Producer' and an 'ExceptT'.
 -}

@@ -4,7 +4,7 @@ Description : Optparse utilities.
 
 Copyright   : (c) Henry J. Wylde, 2015
 License     : BSD3
-Maintainer  : public@hjwylde.com
+Maintainer  : hjwylde@gmail.com
 
 Optparse utilities.
 -}
