@@ -10,8 +10,8 @@ This project provides a binary for working with the Qux language.
 It features:
 * Compiling.
 * Type checking.
-* Pretty printing.
 * Dependency printing.
+* Pretty printing.
 
 For quick help on how to call `qux`, see `qux --help`.
 
@@ -40,9 +40,8 @@ export PATH=$PATH:~/.cabal/bin
 ### Usage
 
 The `qux` binary is designed to be modular and solely for manipulating Qux files.
-It is used in one part of the Qux build cycle&mdash;see the [meta](https://github.com/hjwylde/meta)
-    build tool for how it can be used in conjunction with other compilers (e.g., `llc`, `gcc`, and
-    `clang`).
+It compiles a qux file down to LLVM which may then be either interpreted or further compiled down to
+    machine code (using either `lli` or `llc`).
 
 There are 5 commands available:
 
@@ -64,10 +63,11 @@ The `--libpath` option takes a path separated list of directories (e.g., `lib/:.
     libraries referenced by imports.
 This is used in name resolution to fully qualify all types and functions.
 
-Adding the `--type-check` option causes the command to check that types are used correctly.
+Adding the `--type-check` option will add the type checking analysis step to ensure types are used
+    correctly.
 If an error is found, then it is reported to standard error and the build process stops.
 
-The `--compile` option adds compiling the Qux files into LLVM bitcode or assembly (specified by the
+The `--compile` option adds compiling the Qux files into LLVM assembly or bitcode (specified by the
     `--format` option).
 The organisation and naming of the input files does not matter, however the output files will be
     written out to the destination directory in appropriate module folders.
