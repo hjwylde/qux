@@ -18,6 +18,7 @@ module Qux.Options (
 ) where
 
 import Data.List.Extra (lower, nub)
+import Data.Monoid
 import Data.Version    (showVersion)
 
 import qualified Language.Qux.Version as Qux

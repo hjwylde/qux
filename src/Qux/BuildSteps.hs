@@ -33,7 +33,7 @@ import Control.Monad.Except
 import Control.Monad.Extra
 import Control.Monad.Reader
 
-import qualified Data.ByteString as BS
+import qualified Data.ByteString as ByteString
 import           Data.Function
 import           Data.List.Extra
 
@@ -45,8 +45,8 @@ import           Language.Qux.Annotated.TypeChecker
 import qualified Language.Qux.Annotated.TypeResolver as TypeResolver
 import qualified Language.Qux.Llvm.Compiler          as Compiler
 
-import LLVM.General
-import LLVM.General.Context hiding (Context)
+import LLVM
+import LLVM.Context hiding (Context)
 
 import Prelude hiding (log)
 
@@ -146,10 +146,10 @@ typeCheckAll baseContext programs = forM_ programs typeCheck'
 compileToLlvmAssembly :: Context -> FilePath -> Program SourcePos -> WorkerT IO ()
 compileToLlvmAssembly context binDir program = liftIO $ do
     assembly <- withContext $ \context ->
-        runExceptT (withModuleFromAST context llvmModule moduleLLVMAssembly) >>= either fail return
+        withModuleFromAST context llvmModule moduleLLVMAssembly
 
     createDirectoryIfMissing True (takeDirectory filePath)
-    writeFile filePath assembly
+    ByteString.writeFile filePath assembly
     where
         module_     = let (Program _ module_ _) = program in map simp module_
         llvmModule  = runReader (Compiler.compileProgram $ simp program) context
@@ -178,10 +178,10 @@ compileAllToLlvmAssembly baseContext binDir programs = forM_ indexedPrograms $ \
 compileToLlvmBitcode :: Context -> FilePath -> Program SourcePos -> WorkerT IO ()
 compileToLlvmBitcode context binDir program = liftIO $ do
     bitcode <- withContext $ \context ->
-        runExceptT (withModuleFromAST context llvmModule moduleBitcode) >>= either fail return
+        withModuleFromAST context llvmModule moduleBitcode
 
     createDirectoryIfMissing True (takeDirectory filePath)
-    BS.writeFile filePath bitcode
+    ByteString.writeFile filePath bitcode
     where
         module_     = let (Program _ module_ _) = program in map simp module_
         llvmModule  = runReader (Compiler.compileProgram $ simp program) context
