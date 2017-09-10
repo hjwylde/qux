@@ -46,10 +46,13 @@ handle options = do
     BuildSteps.parse (argFilePath options) >>= print options
 
 print :: Options -> Program SourcePos -> WorkerT IO ()
-print options program = liftIO $ putStrLn (renderStyle style (pPrint program))
+print options program = liftIO $ putStrLn (pRender style program)
     where
         style = Style
             { mode              = optMode options
             , lineLength        = optLineLength options
             , ribbonsPerLine    = optRibbonsPerLine options
             }
+
+pRender :: Pretty a => Style -> a -> String
+pRender style = renderStyle style . pPrint
